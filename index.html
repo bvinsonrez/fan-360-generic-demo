@@ -1,0 +1,3754 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<meta name="robots" content="noindex, nofollow">
+<title>Fan 360 Demo</title>
+<style>
+:root {
+  --primary: #004987; --accent: #7E3DA0; --ink: #1B2733; --slate: #5B6B7B;
+  --grey: #9AA5B1; --grey-light: #D5DBE1; --surface: #F4F6F8; --white: #FFFFFF;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  display: flex; flex-direction: column; min-height: 100vh;
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink); background: var(--surface);
+}
+.app-header { display: flex; align-items: center; gap: 14px; background: var(--primary); padding: 8px 24px; flex: none; }
+.wordmark { height: 26px; width: auto; display: block; }
+.chip { font-size: 12px; font-weight: 600; color: var(--white); border: 1px solid rgba(255,255,255,.6); border-radius: 999px; padding: 2px 10px; letter-spacing: .02em; }
+
+.tabbar { display: flex; align-items: flex-end; gap: 18px; background: var(--white); border-bottom: 1px solid var(--grey-light); padding: 6px 24px 0; overflow-x: auto; white-space: nowrap; flex: none; }
+.tab-group { display: flex; flex-direction: column; flex: none; }
+.tab-group-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--slate); padding: 0 2px 2px; }
+.tab-group-tabs { display: flex; gap: 2px; }
+.tab { font: inherit; font-weight: 600; color: var(--slate); background: none; border: 0; border-bottom: 3px solid transparent; padding: 6px 12px 7px; cursor: pointer; }
+.tab:hover { color: var(--primary); }
+.tab[aria-selected="true"] { color: var(--primary); border-bottom-color: var(--primary); }
+.tab:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.tab-sep { width: 1px; align-self: stretch; background: var(--grey-light); margin: 4px 0; flex: none; }
+
+.app-main { flex: 1 1 auto; padding: 14px 24px 8px; max-width: 1280px; width: 100%; margin: 0 auto; }
+.loading, .placeholder { color: var(--slate); font-size: 16px; padding: 40px 0; }
+
+.sys-intro { margin: 0 0 10px; font-size: 15px; color: var(--ink); max-width: 980px; }
+.kpis { display: flex; gap: 10px; margin-bottom: 10px; }
+.kpi { flex: 1 1 0; background: var(--white); border: 1px solid var(--grey-light); border-radius: 6px; padding: 8px 12px; }
+.kpi-value { font-size: 24px; font-weight: 700; color: var(--primary); line-height: 1.15; }
+.kpi-label { font-size: 12px; color: var(--slate); }
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chart-card { background: var(--white); border: 1px solid var(--grey-light); border-radius: 6px; padding: 8px 12px 6px; min-width: 0; }
+.chart-title { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--ink); }
+.chart-box { position: relative; height: 250px; }
+.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--slate); font-size: 14px; background: var(--surface); border-radius: 4px; }
+.cant-tell { margin-top: 10px; border-left: 4px solid var(--primary); background: var(--white); border-radius: 0 6px 6px 0; padding: 8px 14px; }
+.cant-tell-title { margin: 0 0 2px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); }
+.cant-tell-body { margin: 0; font-size: 14px; }
+
+.footnote { flex: none; max-width: 1280px; width: 100%; margin: 0 auto; padding: 0 24px 4px; font-size: 12px; color: var(--slate); }
+.app-footer { flex: none; background: var(--primary); color: var(--white); font-size: 12px; padding: 5px 24px; text-align: center; }
+
+@media (max-width: 900px) {
+  .charts { grid-template-columns: 1fr; }
+  .kpis { flex-wrap: wrap; }
+  .kpi { flex: 1 1 140px; }
+}
+
+/* Tab 4 */
+.kpis-hero { align-items: stretch; }
+.kpi-large { flex: 1.6 1 0; background: var(--primary); border-color: var(--primary); }
+.kpi-large .kpi-value { font-size: 40px; color: var(--white); }
+.kpi-large .kpi-label { color: var(--white); font-size: 13px; }
+.kpi-note { font-size: 12px; color: var(--slate); }
+.parts-bar { display: flex; height: 26px; border-radius: 4px; overflow: hidden; margin: 6px 0 8px; gap: 2px; }
+.parts-seg { min-width: 4px; }
+.parts-seg-0 { background: var(--primary); }
+.parts-seg-1 { background: #4A86C5; }
+.parts-seg-2 { background: var(--grey); }
+.parts-list { list-style: none; margin: 0 0 6px; padding: 0; }
+.parts-item { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 14px; }
+.parts-swatch { width: 12px; height: 12px; border-radius: 2px; flex: none; }
+.parts-swatch-none { background: none; }
+.parts-name { flex: 1 1 auto; }
+.parts-value { font-weight: 700; color: var(--primary); }
+.parts-total { border-top: 1px solid var(--grey-light); margin-top: 2px; padding-top: 4px; font-weight: 600; }
+.takeaway { margin: 6px 0 2px; font-size: 14px; color: var(--ink); border-left: 3px solid var(--primary); padding-left: 8px; }
+
+/* Tab 5 */
+.pf-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px; }
+.pf-bar-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--slate); }
+.chips { display: flex; gap: 6px; }
+.chip-btn, .role-btn, .result-btn { font: inherit; font-weight: 600; color: var(--primary); background: var(--white); border: 1px solid var(--grey-light); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.chip-btn[aria-pressed="true"], .role-btn[aria-pressed="true"], .result-btn[aria-pressed="true"] { background: var(--primary); color: var(--white); border-color: var(--primary); }
+.pf-search { font: inherit; flex: 1 1 220px; min-width: 200px; max-width: 340px; padding: 5px 10px; border: 1px solid var(--grey); border-radius: 6px; }
+.role-toggle { display: flex; gap: 4px; margin-left: auto; }
+.pf-results { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; max-height: 76px; overflow-y: auto; }
+.result-btn { font-weight: 500; padding: 2px 10px; }
+.pf-none { color: var(--slate); }
+.pf-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 8px; }
+.pf-name { margin: 0; font-size: 22px; color: var(--primary); }
+.pf-meta { color: var(--slate); }
+.pf-role { margin-left: auto; font-weight: 600; }
+.pf-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+.pf-col { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.pf-group { background: var(--white); border: 1px solid var(--grey-light); border-radius: 6px; padding: 6px 12px 8px; }
+.pf-group-title { margin: 0 0 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); }
+.pf-row { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; border-bottom: 1px solid var(--surface); }
+.pf-label { color: var(--slate); }
+.pf-value { text-align: right; overflow-wrap: anywhere; }
+.pill-restricted { background: var(--grey-light); color: var(--slate); border-radius: 999px; padding: 0 10px; font-size: 12px; font-weight: 700; align-self: center; }
+.lanes { display: flex; flex-direction: column; gap: 4px; }
+.lane { display: grid; grid-template-columns: 112px 1fr; gap: 8px; align-items: stretch; }
+.lane-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.lane-name { font-weight: 600; font-size: 13px; color: var(--primary); align-self: center; }
+.lane-season { font-size: 12px; font-weight: 700; color: var(--slate); text-align: center; }
+.lane-cell { background: var(--surface); border-radius: 4px; min-height: 44px; padding: 3px; display: flex; flex-direction: column; gap: 3px; }
+.lane-event { font-size: 12px; background: var(--primary); color: var(--white); border-radius: 3px; padding: 1px 5px; }
+.lane-transfer { background: var(--grey); color: var(--ink); }
+.lane-group, .lane-experience { background: #4A86C5; }
+@media (max-width: 900px) { .pf-cols { grid-template-columns: 1fr; } }
+
+/* Tab 6 */
+.btn { font: inherit; font-weight: 600; color: var(--white); background: var(--primary); border: 1px solid var(--primary); border-radius: 6px; padding: 5px 14px; cursor: pointer; }
+.btn-quiet { color: var(--primary); background: var(--white); border-color: var(--grey); }
+.seg-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 14px; align-items: start; }
+.seg-rail { background: var(--white); border: 1px solid var(--grey-light); border-radius: 6px; padding: 8px 12px 10px; }
+.rail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.rail-title { margin: 0; font-size: 18px; color: var(--primary); }
+.rail-section { border-top: 1px solid var(--grey-light); padding-top: 6px; margin-top: 8px; }
+.rail-section-title { margin: 0 0 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); }
+.ctl { margin: 4px 0; }
+.ctl-check { display: flex; align-items: flex-start; gap: 6px; cursor: pointer; }
+.ctl-check input { margin-top: 3px; }
+.ctl-num { display: flex; flex-direction: column; gap: 2px; }
+.ctl-number { font: inherit; width: 90px; padding: 3px 6px; border: 1px solid var(--grey); border-radius: 4px; }
+.ctl-group-label { color: var(--slate); }
+.ctl-multi { display: flex; flex-direction: column; gap: 1px; }
+.seg-top { position: sticky; top: 4px; z-index: 5; background: var(--surface); padding-bottom: 4px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.seg-title { margin: 0; font-size: 22px; color: var(--primary); }
+.seg-count-box { background: var(--primary); color: var(--white); border-radius: 6px; padding: 8px 16px; text-align: right; min-width: 260px; }
+.seg-count { font-size: 40px; font-weight: 700; line-height: 1.1; }
+.seg-count-label { font-size: 13px; }
+.seg-eligible-line { font-size: 14px; margin-top: 2px; }
+.seg-eligible { font-weight: 700; }
+.seg-banner { background: var(--white); border-left: 4px solid var(--accent); border-radius: 0 6px 6px 0; padding: 6px 12px; margin-bottom: 8px; }
+.seg-banner-title { font-weight: 700; color: var(--primary); }
+.filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.filter-chip { background: var(--surface); border: 1px solid var(--grey-light); border-radius: 999px; padding: 1px 10px; font-size: 14px; }
+.chan-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+.seg-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+.seg-channel .wf-box { min-height: 26px; }
+.wf-eligible { background: var(--primary); }
+.wf-removed { background: var(--grey); }
+.seg-sub { margin: 8px 0 2px; font-size: 14px; color: var(--primary); }
+.seg-note { margin: 0 0 4px; color: var(--slate); }
+.seg-assumption { margin: 6px 0 0; color: var(--slate); font-size: 14px; }
+.proj-row { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; border-bottom: 1px solid var(--surface); }
+.proj-value { font-weight: 700; color: var(--primary); }
+.proj-revenue { border-top: 1px solid var(--grey-light); font-weight: 700; }
+.seg-combined { margin-top: 10px; }
+.save-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.seg-name { font: inherit; padding: 5px 10px; border: 1px solid var(--grey); border-radius: 6px; width: 220px; }
+.seg-saved { margin-top: 8px; }
+.saved-row { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
+.saved-name { font-weight: 600; }
+.saved-count { color: var(--slate); }
+
+/* Tab 7 */
+.recs-title { margin: 0 0 4px; font-size: 22px; color: var(--primary); }
+.recs-note { margin: 0 0 4px; max-width: 980px; }
+.recs-rank { color: var(--slate); margin-bottom: 10px; }
+.recs-list { display: flex; flex-direction: column; gap: 8px; }
+.rec-card { background: var(--white); border: 1px solid var(--grey-light); border-radius: 6px; padding: 8px 14px; }
+.rec-open { border-color: var(--primary); }
+.rec-head { display: flex; align-items: center; gap: 10px; }
+.rec-rank { background: var(--primary); color: var(--white); border-radius: 999px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
+.rec-name { margin: 0; font-size: 17px; color: var(--primary); flex: 1 1 auto; }
+.rec-stats { display: flex; gap: 28px; margin: 4px 0 6px 36px; }
+.rec-stat-value { font-size: 22px; font-weight: 700; color: var(--primary); line-height: 1.2; }
+.rec-stat-label { font-size: 14px; color: var(--slate); }
+.rec-body { margin: 0 0 6px 36px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 20px; }
+.rec-body p { margin: 0 0 4px; }
+.rec-evidence { grid-row: span 3; grid-column: 2; }
+.ev-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.ev-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 90px; align-items: center; gap: 8px; padding: 2px 0; }
+.ev-name { font-size: 14px; color: var(--slate); }
+.ev-track { background: var(--surface); border-radius: 3px; height: 18px; }
+.ev-bar { height: 18px; border-radius: 3px; }
+.ev-seg { background: var(--accent); }
+.ev-base { background: var(--grey); }
+.ev-value { font-size: 14px; font-weight: 600; }
+.rec-sponsor { color: var(--slate); font-style: italic; }
+.rec-actions { display: flex; gap: 8px; margin-left: 36px; }
+@media (max-width: 900px) { .seg-layout, .rec-body { grid-template-columns: 1fr; } .rec-evidence { grid-column: 1; grid-row: auto; } }
+
+</style>
+</head>
+<body>
+<header class="app-header">
+  <img class="wordmark" src="assets/wordmark.png" alt="Resultant">
+  <span class="chip">Synthetic data</span>
+</header>
+<nav class="tabbar" id="tabbar" aria-label="Demo sections"></nav>
+<main class="app-main" id="app"><p class="loading">Loading synthetic fan data…</p></main>
+<div class="footnote">Modeled from a 20,000-record synthetic sample, scaled ×25.</div>
+<footer class="app-footer">Demonstration with synthetic data, prepared by Resultant.</footer>
+<script src="vendor/chart.umd.min.js"></script>
+<script>
+(function () {
+var __defs = {
+"config.js": function (module, exports, require) {
+// All team constants, seed, scale, channels, rates and copy live here.
+const SEED = 20261105;
+const SAMPLE_SIZE = 20000;
+const SCALE = 25;
+const SEASONS = [2024, 2025, 2026];
+const AS_OF = '2026-11-04';
+const HOME_GAMES = { 2024: 81, 2025: 81, 2026: 80 };
+
+// Order is busiest first: G34, then G29.
+const GATES = [
+  { id: 'G3', label: 'Home Plate Gate' },
+  { id: 'G6', label: 'Right Field Gate' },
+  { id: 'G14', label: 'Left Field Gate' },
+  { id: 'G29', label: 'Center Field Gate' },
+  { id: 'G34', label: 'Plaza Gate' },
+];
+
+// season_pre is valid only in 2024; choice/reserved/starter only in 2025+.
+const PLANS = {
+  season_pre: 'Season Ticket (pre-membership)',
+  choice: 'Member Choice',
+  reserved: 'Member Reserved',
+  starter: 'Member Starter',
+  ballpark_pass: 'Ballpark Pass',
+  triple_play: 'Triple Play Bundle',
+  single: 'Single game',
+  none: 'No purchase',
+};
+const MEMBER_PLANS = ['choice', 'reserved', 'starter'];
+
+const PREMIUM_AREAS = [
+  'Champions Club',
+  'Home Plate Club',
+  'Dugout Club',
+  'Rooftop Deck',
+  'Suites',
+];
+const REGIONS = ['Home state', 'Neighbor state (east)', 'Neighbor state (south)', 'Neighbor states (west)', 'Other'];
+const GROUP_TYPES = ['Corporate', 'Youth sports', 'Church', 'School', 'Nonprofit', 'Social'];
+
+// rates are fractions; aov is average order value in dollars.
+const CHANNELS = [
+  { id: 'email', label: 'Email', consentKey: 'email',
+    rates: { delivered: 0.95, opened: 0.38, clicked: 0.06, purchased: 0.03 }, aov: 84 },
+  { id: 'sms', label: 'SMS', consentKey: 'sms',
+    rates: { delivered: 0.97, opened: 0.68, clicked: 0.12, purchased: 0.04 }, aov: 72,
+    note: 'Requires documented consent, not just a preference flag.' },
+  { id: 'push', label: 'Team app push', consentKey: 'push',
+    rates: { delivered: 0.88, opened: 0.31, clicked: 0.15, purchased: 0.05 }, aov: 66 },
+  { id: 'social', label: 'Paid social audience (hashed match)', consentKey: 'email',
+    rates: { matched: 0.62, clicked: 0.013, purchased: 0.006 }, aov: 78 },
+];
+
+const PALETTE = {
+  primary: '#004987',
+  accent: '#7E3DA0',
+  ink: '#1B2733',
+  slate: '#5B6B7B',
+  grey: '#9AA5B1',
+  greyLight: '#D5DBE1',
+  surface: '#F4F6F8',
+  white: '#FFFFFF',
+};
+
+const COPY = {
+  footer: 'Demonstration with synthetic data, prepared by Resultant.',
+  footnote: 'Modeled from a 20,000-record synthetic sample, scaled ×25.',
+  chip: 'Synthetic data',
+  recsLabel: 'Pattern detection across linked records',
+  recsProdNote: 'In production, these patterns would run as models in Databricks over the same linked records.',
+};
+
+module.exports = {
+  SEED, SAMPLE_SIZE, SCALE, SEASONS, AS_OF, HOME_GAMES, GATES, PLANS, MEMBER_PLANS,
+  PREMIUM_AREAS, REGIONS, GROUP_TYPES, CHANNELS, PALETTE, COPY,
+};
+
+},
+"display-metrics.js": function (module, exports, require) {
+// Collects every string the UI shows for metrics, so tests can scan them.
+const { CHANNELS, SCALE } = require('./config');
+const { scaled, fmtCount, fmtMoney, fmtChartValue } = require('./format');
+const { applyFilters, consentWaterfall, projectResults, projectionDisplay, assumptionText, combineProjections } = require('./segments');
+const { fanProfileView, ROLES } = require('./views-profile');
+
+const CHANNEL_IDS = CHANNELS.map((c) => c.id);
+
+// Every channel subset of size 2 to 4 (11 for four channels), in stable order.
+function channelSubsets() {
+  const out = [];
+  for (let mask = 1; mask < (1 << CHANNEL_IDS.length); mask++) {
+    const ids = CHANNEL_IDS.filter((_, i) => mask & (1 << i));
+    if (ids.length >= 2) out.push(ids);
+  }
+  return out;
+}
+
+function addChart(out, c) {
+  out.push(c.title, ...c.labels.map(String));
+  for (const s of c.series) {
+    out.push(s.name);
+    for (const v of s.data) if (v !== null) out.push(fmtChartValue(v, c.unit));
+  }
+}
+
+function addEvidenceChart(out, c, unit) {
+  out.push(...c.labels);
+  for (const row of c.series) for (const v of row) out.push(fmtChartValue(v, unit));
+}
+
+function addWaterfall(out, w) {
+  out.push(...w.display.labels, w.display.totalLabel, ...w.steps.map((s) => s.label));
+}
+
+// Known-optional fields are skipped when absent; everything else is pushed as-is.
+const optional = (out, ...vals) => { for (const v of vals) if (v !== undefined && v !== null) out.push(v); };
+
+function collectDisplayedStrings(model) {
+  const out = [];
+  const { views, fans, world, recommendations } = model;
+
+  for (const v of [views.ticketing, views.fnb, views.groups]) {
+    optional(out, v.intro, v.cantTell);
+    for (const k of v.kpis) out.push(k.label, k.value);
+    for (const c of v.charts) addChart(out, c);
+  }
+
+  const f = views.fan360;
+  for (const k of f.kpis) { out.push(k.label, k.value); optional(out, k.note); }
+  out.push(...f.funnel.labels, f.funnel.totalLabel, ...f.funnel.names);
+  out.push(...f.matchBreakdown.labels, f.matchBreakdown.totalLabel, ...f.matchBreakdown.names);
+  addChart(out, f.overlap);
+  addChart(out, f.valueBySystems);
+  out.push(...Object.values(f.takeaways));
+
+  for (const id of CHANNEL_IDS) addWaterfall(out, consentWaterfall(fans, id));
+  for (const ch of CHANNELS) out.push(assumptionText(ch));
+
+  for (const card of recommendations) {
+    out.push(
+      card.name, card.ruleText, card.valueAssumption, card.whyNow,
+      fmtCount(scaled(card.matched)), fmtCount(scaled(card.eligible)), fmtMoney(card.projectedValue),
+      card.evidence.label, card.evidence.baselineLabel, card.evidence.segmentValue, card.evidence.baselineValue,
+    );
+    addEvidenceChart(out, card.evidence.chart, card.evidence.chart.unit);
+    if (card.sponsorAudience) out.push(card.sponsorAudience, card.sponsorAudienceSize);
+    const audience = applyFilters(fans, card.filters);
+    for (const id of CHANNEL_IDS) {
+      const w = consentWaterfall(audience, id);
+      addWaterfall(out, w);
+      const disp = projectionDisplay(projectResults(w.eligible, [id]));
+      for (const c of disp.perChannel) { out.push(c.label); for (const r of c.rows) out.push(r.label, r.value); }
+      for (const r of disp.combined) out.push(r.label, r.value);
+    }
+    for (const ids of channelSubsets()) {
+      const results = ids.map((id) => projectResults(consentWaterfall(audience, id).eligible, [id]));
+      for (const r of combineProjections(results)) out.push(r.label, r.value);
+    }
+  }
+
+  for (const hero of fans.filter((x) => x.heroId)) {
+    for (const role of Object.keys(ROLES)) {
+      const p = fanProfileView(hero, role, world);
+      out.push(p.header.name, p.header.region, p.header.roleLabel, p.header.confidence);
+      for (const fld of p.fields) out.push(fld.label, fld.value);
+      for (const h of p.household) out.push(h.label, h.value);
+      for (const lane of p.swimlanes) for (const e of lane.events) out.push(e.label);
+    }
+  }
+  return out;
+}
+
+module.exports = { collectDisplayedStrings, channelSubsets };
+
+},
+"fans.js": function (module, exports, require) {
+// Unified Fan records: one per linkage cluster, with the attributes tab 5 shows and
+// tab 6 filters on. Records are joined to fans by the node ids documented in linkage.js;
+// F&B txns and Kids Club rows that are not nodes join by the same contact key linkage uses.
+const { SEASONS, PREMIUM_AREAS } = require('./config');
+
+const normEmail = (e) => String(e || '').trim().toLowerCase();
+const normPhone = (p) => String(p || '').replace(/\D/g, '');
+const contactKey = (r) => `${String(r.name).toLowerCase()}|${normEmail(r.email)}|${normPhone(r.phone)}`;
+
+// Higher rank wins when a fan holds several accounts in one season.
+const PLAN_RANK = { none: 0, single: 1, triple_play: 2, ballpark_pass: 3, season_pre: 4, starter: 4, reserved: 5, choice: 5 };
+const CONSENT_RANK = { none: 0, opt_out: 1, opt_in: 2 };
+const PREMIUM = new Set(PREMIUM_AREAS);
+const Y0 = SEASONS[0];
+const NS = SEASONS.length;
+
+function regionForZip(zip) {
+  const z = Number(String(zip || '').slice(0, 3));
+  if (z >= 550 && z <= 567) return 'Home state';
+  if (z >= 530 && z <= 549) return 'Neighbor state (east)';
+  if (z >= 500 && z <= 528) return 'Neighbor state (south)';
+  if (z >= 570 && z <= 588) return 'Neighbor states (west)';
+  return 'Other';
+}
+
+// Season-indexed typed arrays (index = fan * NS + season offset) keep the hot loops cheap;
+// they become { 2024, 2025, 2026 } objects once at the end. The object literal is much faster
+// than assigning integer keys one by one, so the seasons are spelled out here.
+if (NS !== 3 || Y0 !== 2024) throw new Error('fans.js bySeason expects seasons 2024–2026');
+const same = (v) => v;
+function bySeason(arr, i, map = same) {
+  const b = i * NS;
+  return { 2024: map(arr[b]), 2025: map(arr[b + 1]), 2026: map(arr[b + 2]) };
+}
+
+function buildFans(world, linkage) {
+  const clusters = linkage.clusters;
+  const nf = clusters.length;
+  const plan = new Uint8Array(nf * NS);
+  const games = new Uint16Array(nf * NS);
+  const ticketGames = new Uint16Array(nf * NS);
+  const xfer = new Uint16Array(nf * NS);
+  const fnb = new Float64Array(nf * NS);
+  const retail = new Uint8Array(nf * NS);
+  const spend = new Float64Array(nf * NS);
+  const active = new Uint8Array(nf * NS);
+  const sysT = new Uint8Array(nf), sysF = new Uint8Array(nf), sysG = new Uint8Array(nf);
+  const outings = new Uint16Array(nf);
+  const premOwn = new Uint16Array(nf), premXfer = new Uint16Array(nf), premGroup = new Uint16Array(nf);
+  const surveySat = new Array(nf).fill(null);
+  const surveySeason = new Int16Array(nf).fill(-1);
+  const kids = Array.from({ length: nf }, () => []);
+  const consentDetail = Array.from({ length: nf }, () => ({}));
+  const dnc = new Uint8Array(nf);
+  const planNames = Object.keys(PLAN_RANK);
+  const planIdx = Object.fromEntries(planNames.map((p, i) => [p, i]));
+
+  const byNode = new Map();
+  clusters.forEach((c, i) => { for (const n of c.nodes) byNode.set(`${n.source}:${n.id}`, i); });
+  const fanFor = (source, id) => byNode.get(`${source}:${id}`);
+  const si = (yr) => yr - Y0;
+
+  // ---- ticketing accounts and scans ----
+  const byTkt = new Map();
+  for (const t of world.ticketing) {
+    const f = fanFor('ticketing', t.tktId);
+    byTkt.set(t.tktId, f);
+    sysT[f] = 1;
+    for (const yr of SEASONS) {
+      const s = t.seasons[yr];
+      const k = f * NS + si(yr);
+      if (PLAN_RANK[s.plan] > PLAN_RANK[planNames[plan[k]]]) plan[k] = planIdx[s.plan];
+      xfer[k] += s.transfersSent;
+      spend[k] += s.ticketSpend;
+      if (s.plan !== 'none') active[k] = 1;
+    }
+  }
+  for (const s of world.scans) {
+    if (!s.tktId) continue;
+    const f = byTkt.get(s.tktId);
+    const k = f * NS + si(s.season);
+    ticketGames[k]++;
+    games[k]++;
+    active[k] = 1;
+    if (PREMIUM.has(s.seatArea)) {
+      if (s.viaTransfer) premXfer[f]++;
+      else premOwn[f]++;
+    }
+  }
+
+  // ---- groups: organizer and known attendees each count one outing and one game ----
+  for (const g of world.groups) {
+    const named = [fanFor('groups', `${g.bookingId}:organizer`)];
+    for (let a = 0; a < g.knownAttendees.length; a++) named.push(fanFor('groups', `${g.bookingId}:attendee:${a}`));
+    spend[named[0] * NS + si(g.season)] += g.amount;
+    for (const f of named) {
+      const k = f * NS + si(g.season);
+      sysG[f] = 1;
+      outings[f]++;
+      games[k]++;
+      active[k] = 1;
+      if (PREMIUM.has(g.seatArea)) premGroup[f]++;
+    }
+  }
+
+  // ---- F&B and retail ----
+  const fnbByKey = new Map();
+  for (const t of world.fnbIdentified) {
+    const key = contactKey(t);
+    let f = fnbByKey.get(key);
+    if (f === undefined) { f = fanFor('fnb', t.txnId); fnbByKey.set(key, f); }
+    const k = f * NS + si(t.season);
+    sysF[f] = 1;
+    fnb[k] += t.amount;
+    spend[k] += t.amount;
+    active[k] = 1;
+    if (t.venue === 'team_store' || t.venue === 'mobile') retail[k] = 1;
+  }
+
+  // ---- experiences (part of the Groups & Experiences system), surveys, Kids Club ----
+  for (const e of world.experiences) {
+    const f = fanFor('experiences', e.expId);
+    const k = f * NS + si(e.season);
+    sysG[f] = 1;
+    spend[k] += e.amount;
+    active[k] = 1;
+  }
+  for (const s of world.surveys) {
+    const f = fanFor('surveys', s.respId);
+    if (s.season >= surveySeason[f]) { surveySat[f] = s.satisfaction; surveySeason[f] = s.season; }
+  }
+  const kcByKey = new Map();
+  for (const r of world.kidsClub) {
+    const key = contactKey(r.parent);
+    let f = kcByKey.get(key);
+    if (f === undefined) { f = fanFor('kidsClub', r.kcId); kcByKey.set(key, f); }
+    kids[f].push({ kcId: r.kcId, joinDate: r.joinDate });
+  }
+
+  // ---- consent and do-not-contact, matched on normalized contacts ----
+  const fanByEmail = new Map();
+  const fanByPhone = new Map();
+  clusters.forEach((c, i) => {
+    for (const e of c.emails) fanByEmail.set(e, i);
+    for (const p of c.phones) fanByPhone.set(p, i);
+  });
+  for (const r of world.consent) {
+    const f = r.channel === 'sms' ? fanByPhone.get(normPhone(r.contact)) : fanByEmail.get(normEmail(r.contact));
+    if (f === undefined) continue;
+    const cur = consentDetail[f][r.channel];
+    if (!cur || CONSENT_RANK[r.status] > CONSENT_RANK[cur.status]) {
+      consentDetail[f][r.channel] = { status: r.status, source: r.source, date: r.date };
+    }
+  }
+  for (const d of world.dnc) {
+    const f = fanByEmail.has(normEmail(d)) ? fanByEmail.get(normEmail(d)) : fanByPhone.get(normPhone(d));
+    if (f !== undefined) dnc[f] = 1;
+  }
+
+  // ---- assemble ----
+  const fans = clusters.map((c, i) => {
+    const plans = bySeason(plan, i, (v) => planNames[v]);
+    const g = bySeason(games, i);
+    let activeN = 0, total = 0;
+    for (let s = 0; s < NS; s++) if (active[i * NS + s]) { activeN++; total += spend[i * NS + s]; }
+    const cd = consentDetail[i];
+    return {
+      fanId: c.clusterId, name: c.name, zip: c.zip, region: regionForZip(c.zip),
+      isMinor: c.nodes.some((n) => n.isMinor), heroId: (c.nodes.find((n) => n.heroId) || {}).heroId || null,
+      plans, games: g, ticketGames: bySeason(ticketGames, i),
+      attendanceChangePct: g[2025] > 0 ? Math.round(((g[2026] - g[2025]) / g[2025]) * 100) : null,
+      transfersSent: bySeason(xfer, i), fnbSpend: bySeason(fnb, i), fnbPercentile2026: null,
+      retailOrApp: bySeason(retail, i, (v) => v === 1),
+      seasonsActive: activeN, groupOutings: outings[i],
+      ownTicketEver: SEASONS.some((yr) => plans[yr] !== 'none'),
+      singleGameBefore2026: plans[2024] === 'single' || plans[2025] === 'single',
+      premium: { own: premOwn[i], viaTransfer: premXfer[i], viaGroup: premGroup[i] },
+      surveySat: surveySat[i], kidsClubChildren: kids[i],
+      consent: { email: cd.email ? cd.email.status : 'none', sms: cd.sms ? cd.sms.status : 'none', push: cd.push ? cd.push.status : 'none' },
+      consentDetail: cd, dnc: dnc[i] === 1,
+      systems: sysT[i] + sysF[i] + sysG[i],
+      annualValue: activeN ? total / activeN : 0,
+      nodes: c.nodes, evidence: c.evidence, confidence: c.confidence, emails: c.emails, phones: c.phones,
+    };
+  });
+
+  // Percentile rank among fans with any 2026 F&B: share of other spenders below this fan, 0–100 (ties share a rank).
+  const spenders = fans.filter((f) => f.fnbSpend[2026] > 0).sort((a, b) => a.fnbSpend[2026] - b.fnbSpend[2026]);
+  const n = spenders.length;
+  for (let i = 0; i < n;) {
+    let j = i;
+    while (j + 1 < n && spenders[j + 1].fnbSpend[2026] === spenders[i].fnbSpend[2026]) j++;
+    const pct = n === 1 ? 100 : Math.round((i / (n - 1)) * 100);
+    for (let k = i; k <= j; k++) spenders[k].fnbPercentile2026 = pct;
+    i = j + 1;
+  }
+  return fans;
+}
+
+module.exports = { buildFans, regionForZip, normEmail, normPhone, contactKey };
+
+},
+"format.js": function (module, exports, require) {
+// Display formatters. All person-level counts shown in the UI pass through here.
+const { SCALE } = require('./config');
+
+function scaled(raw) {
+  return raw * SCALE;
+}
+
+// Round half up to `d` decimals, avoiding binary drift on exact ties.
+function roundTo(v, d) {
+  const f = Math.pow(10, d);
+  return Math.round(Math.round(v * f * 1e6) / 1e6) / f;
+}
+
+// 3 significant figures for a value already divided into its unit (1 <= v < 1000).
+// Decimals are recomputed after rounding so 9.995 -> "10.0" and 99.95 -> "100".
+function sig3(v) {
+  const r = roundTo(v, v < 10 ? 2 : v < 100 ? 1 : 0);
+  const d = r >= 100 ? 0 : r >= 10 ? 1 : 2;
+  return { r, text: r.toFixed(d) };
+}
+
+function compact(n) {
+  const sign = n < 0 ? '-' : '';
+  const a = Math.abs(n);
+  if (Math.round(a) < 1000) {
+    const r = Math.round(a);
+    return r === 0 ? '0' : sign + r;
+  }
+  if (a < 1e6) {
+    const k = sig3(a / 1000);
+    if (k.r < 1000) return sign + k.text + 'K';
+  }
+  if (a < 1e9) {
+    const m = sig3(a / 1e6);
+    if (m.r < 1000) return sign + m.text + 'M';
+  }
+  return sign + sig3(a / 1e9).text + 'B';
+}
+
+function fmtCount(n) {
+  return compact(n);
+}
+
+function fmtMoney(dollars) {
+  const s = compact(dollars);
+  return s[0] === '-' ? '-$' + s.slice(1) : '$' + s;
+}
+
+function fmtPct(fraction, digits = 0) {
+  const s = roundTo(fraction * 100, digits).toFixed(digits);
+  return (Number(s) === 0 ? (0).toFixed(digits) : s) + '%';
+}
+
+function fmtMultiple(x) {
+  return roundTo(x, 1).toFixed(1) + 'x';
+}
+
+// One formatter for every chart axis tick, tooltip and data label.
+function fmtChartValue(value, unit) {
+  if (unit === 'count') return fmtCount(value);
+  if (unit === 'money') return fmtMoney(value);
+  if (unit === 'pct') return fmtPct(value, Math.abs(value) > 0 && Math.abs(value) < 0.1 ? 1 : 0);
+  if (unit === 'number') {
+    const r = roundTo(value, 1);
+    return r === 0 ? '0' : Number.isInteger(r) ? String(r) : r.toFixed(1);
+  }
+  throw new Error(`Unknown chart unit ${unit}`);
+}
+
+function unitFor(top) {
+  const exp = top > 0 ? Math.floor(Math.log10(top)) : 0;
+  return Math.max(1, Math.pow(10, exp - 2));
+}
+
+function roundParts(parts) {
+  const sum = parts.reduce((a, b) => a + b, 0);
+  let unit = unitFor(Math.max(0, ...parts, sum));
+  let rounded = parts.map((p) => Math.round(p / unit) * unit);
+  let total = rounded.reduce((a, b) => a + b, 0);
+  // Rounding can push the total into the next magnitude; re-derive the unit so
+  // the total never shows more than 3 significant figures.
+  const finer = unitFor(total);
+  if (finer > unit) {
+    unit = finer;
+    rounded = parts.map((p) => Math.round(p / unit) * unit);
+    total = rounded.reduce((a, b) => a + b, 0);
+  }
+  // One display scale and one decimal count for every label and the total.
+  const scale = total >= 1e9 ? 1e9 : total >= 1e6 ? 1e6 : total >= 1000 ? 1000 : 1;
+  const suffix = { 1: '', 1000: 'K', 1e6: 'M', 1e9: 'B' }[scale];
+  let decimals = Math.max(0, Math.round(Math.log10(scale / unit)));
+  // Drop trailing decimal columns that are zero for every value.
+  while (decimals > 0) {
+    const step = scale / Math.pow(10, decimals - 1);
+    if ([...rounded, total].every((v) => v % step === 0)) decimals -= 1;
+    else break;
+  }
+  const label = (v) => (v === 0 ? '0' : (v / scale).toFixed(decimals) + suffix);
+  return { unit, parts: rounded, total, labels: rounded.map(label), totalLabel: label(total) };
+}
+
+module.exports = { scaled, fmtCount, fmtMoney, fmtPct, fmtMultiple, fmtChartValue, roundParts };
+
+},
+"generate.js": function (module, exports, require) {
+// Synthetic team world: hidden people (truth), per-system source records with
+// realistic contact mess, overlays (surveys, Kids Club, consent) and four hero fans.
+// `pid` on source records is hidden truth for tests; linkage must never read it.
+const {
+  SEED, SAMPLE_SIZE, SEASONS, HOME_GAMES, GATES, MEMBER_PLANS, PREMIUM_AREAS, REGIONS, GROUP_TYPES,
+} = require('./config');
+const { mulberry32, pick, intBetween } = require('./rng');
+
+const STANDING = 'Standing room / no assigned seat';
+const GENERAL_AREAS = ['Lower Level', 'Main Level', 'Upper Level', 'Outfield Bleachers'];
+const OWNED_PREMIUM = PREMIUM_AREAS.filter((a) => a !== 'Suites');
+const GROUP_PREMIUM = ['Rooftop Deck', 'Champions Club', 'Suites'];
+const AREA_CUM = [3, 6, 9, 10];
+
+// Tuning knobs. Change these, not the logic, when targets drift.
+const TUNE = {
+  archetypes: {
+    member: 0.06, pass: 0.035, single: 0.2, triple_play: 0.045, group_only: 0.045,
+    retail_only: 0.085, family: 0.05, lapsed_single: 0.017, premium_curious: 0.035, casual: 0.428,
+  },
+  trend: { 2024: 1.1, 2025: 0.97, 2026: 0.85 },
+  memberGames: { 2024: 1.36, 2025: 1.2, 2026: 1.06 },
+  teenRate: 0.08,
+  appUser: {
+    member: 0.07, pass: 0.75, single: 0.06, triple_play: 0.12, group_only: 0.3, retail_only: 0,
+    family: 0.25, lapsed_single: 0.15, premium_curious: 0.85, casual: 0.05,
+  },
+  identRate: 0.4, // share of an app user's in-park transactions that carry identity
+  secondEmail: { ticketing: 0.2, ticketing_dup: 0.85, fnb: 0.55, groups: 0.6, groups_attendee: 0.15, experiences: 0.2, kidsClub: 0.1 },
+  dupAccount: 0.38, // per active season, non-plan buyers checking out on a new account
+  nameMess: 0.055, oldPhone: 0.05, missingPhone: 0.1,
+  groupBookings: { 2024: 290, 2025: 280, 2026: 268 },
+  experiences: { 2024: 110, 2025: 115, 2026: 120 },
+  // Experience buyer mix by archetype (order: member, premium_curious, family, single, triple_play, pass).
+  expBuyers: [0.15, 0.2, 0.25, 0.25, 0.1, 0.05],
+  // Chance a group organizer comes from ticket buyers rather than group-only fans.
+  organizerFromBuyers: { corporate: 0.5, other: 0.15 },
+  surveyRate: 0.06,
+};
+
+// ---------- name and place pools ----------
+const MALE = ['James', 'Robert', 'Michael', 'William', 'Thomas', 'David', 'John', 'Mark', 'Steven', 'Brian',
+  'Eric', 'Daniel', 'Matthew', 'Andrew', 'Ryan', 'Kevin', 'Scott', 'Jason', 'Paul', 'Gregory', 'Peter',
+  'Nathan', 'Derek', 'Craig', 'Troy', 'Luke', 'Gary', 'Dennis', 'Wayne', 'Lars', 'Nils', 'Kyle', 'Adam',
+  'Joel', 'Tyler', 'Cody', 'Aaron', 'Henry', 'Samuel', 'Owen', 'Tou', 'Fue', 'Abdi', 'Mohamed', 'Carlos',
+  'Luis', 'Marcus', 'Darnell', 'Victor', 'Gordon'];
+const FEMALE = ['Jennifer', 'Katherine', 'Elizabeth', 'Mary', 'Susan', 'Karen', 'Lisa', 'Michelle', 'Amy',
+  'Angela', 'Rachel', 'Laura', 'Sarah', 'Heather', 'Megan', 'Emily', 'Hannah', 'Abigail', 'Anna', 'Julie',
+  'Kristin', 'Ingrid', 'Greta', 'Sonja', 'Brenda', 'Diane', 'Denise', 'Holly', 'Paige', 'Tara', 'Nicole',
+  'Molly', 'Erin', 'Bethany', 'Claire', 'Mai', 'Pa', 'Hodan', 'Amina', 'Maria', 'Sofia', 'Yesenia',
+  'Tanisha', 'Renee', 'Vicki', 'Joan', 'Ruth', 'Carol', 'Lynn', 'Wendy'];
+const KIDS = ['Ava', 'Liam', 'Noah', 'Emma', 'Olivia', 'Ella', 'Jack', 'Leo', 'Nora', 'Finn', 'Maya',
+  'Theo', 'Isla', 'Gus', 'Hazel', 'Milo', 'Ruby', 'Axel', 'Ivy', 'Otto'];
+const LAST = ['Anderson', 'Johnson', 'Nelson', 'Olson', 'Peterson', 'Larson', 'Swanson', 'Hanson',
+  'Carlson', 'Erickson', 'Lindquist', 'Schmidt', 'Mueller', 'Nguyen', 'Vang', 'Xiong', 'Her', 'Lee', 'Ali',
+  'Hassan', 'Garcia', 'Martinez', 'Miller', 'Smith', 'Brown', 'Jones', 'Wilson', 'Thompson', 'Moore',
+  'Taylor', 'Jackson', 'White', 'Harris', 'Clark', 'Lewis', 'Walker', 'Hall', 'Young', 'King', 'Wright',
+  'Hill', 'Scott', 'Green', 'Baker', 'Adams', 'Mitchell', 'Roberts', 'Turner', 'Phillips', 'Campbell',
+  'Parker', 'Evans', 'Edwards', 'Collins', 'Stewart', 'Morris', 'Murphy', 'Cook', 'Rogers', 'Morgan',
+  'Bell', 'Kelly', 'Howard', 'Ward', 'Cox', 'Richardson', 'Wood', 'Watson', 'Brooks', 'Bennett', 'Gray',
+  'James', 'Reyes', 'Cruz', 'Hughes', 'Price', 'Myers', 'Long', 'Foster', 'Sanders', 'Ross', 'Morales',
+  'Powell', 'Sullivan', 'Russell', 'Ortiz', 'Jenkins', 'Gutierrez', 'Perry', 'Butler', 'Barnes', 'Fisher',
+  'Henderson', 'Coleman', 'Simmons', 'Patterson', 'Jordan', 'Reynolds', 'Hamilton', 'Graham', 'Kim',
+  'Wallace', 'Becker', 'Schultz', 'Hoffman', 'Kowalski', 'Novak', 'Dahl', 'Berg', 'Lund', 'Strand',
+  'Moen', 'Haugen', 'Bakken', 'Thorson', 'Wagner', 'Krueger', 'Klein', 'Weber', 'Koch', 'Schroeder',
+  'Fitzgerald', 'Gustafson', 'Sandberg', 'Engstrom', 'Rasmussen', 'Christensen', 'Jensen', 'Madsen'];
+const NICK = {
+  Robert: 'Bob', William: 'Bill', Katherine: 'Kate', James: 'Jim', Michael: 'Mike', Elizabeth: 'Liz',
+  Thomas: 'Tom', Jennifer: 'Jen',
+};
+const PERSONAL_DOMAINS = ['example.com', 'example.net', 'example.org', 'mail.example.com', 'mail.example.net',
+  'inbox.example.org', 'home.example.com', 'web.example.net', 'post.example.org'];
+const PERSONAL_CUM = [38, 50, 60, 68, 76, 85, 89, 93, 96];
+const WORK_DOMAINS = ['northstarmfg.example', 'lakeshorehealth.example', 'prairiebankmn.example', 'gophermedical.example',
+  'riverbendlaw.example', 'tenthousandlakes.example', 'minnehahasupply.example', 'cedarcreekschools.example',
+  'loonlogistics.example', 'arrowheadins.example', 'bluffcountry.example', 'mississippimill.example'];
+
+const ZIP_RANGES = {
+  'Home state': [[55101, 55130, 3], [55301, 55350, 2], [55369, 55379, 2], [55401, 55447, 3], [55001, 55025, 1],
+    [55033, 55044, 1], [55068, 55077, 2], [55110, 55128, 2], [55901, 55906, 1], [56001, 56003, 1],
+    [55801, 55812, 1], [56301, 56304, 1]],
+  'Neighbor state (east)': [[54001, 54025, 1], [54701, 54703, 1], [53703, 53719, 1], [54601, 54603, 1]],
+  'Neighbor state (south)': [[50309, 50325, 1], [52001, 52003, 1], [52401, 52411, 1], [51101, 51111, 1]],
+  'Neighbor states (west)': [[58102, 58104, 1], [57103, 57110, 1], [58501, 58504, 1]],
+  Other: [[60601, 60614, 1], [80202, 80211, 1], [85004, 85016, 1], [75201, 75206, 1]],
+};
+const REGION_W = { 'Home state': 0.72, 'Neighbor state (east)': 0.1, 'Neighbor state (south)': 0.07, 'Neighbor states (west)': 0.06, Other: 0.05 };
+const AREA_CODES = {
+  'Home state': ['612', '651', '763', '952', '507', '218', '320'], 'Neighbor state (east)': ['715', '608', '920'],
+  'Neighbor state (south)': ['515', '319', '563'], 'Neighbor states (west)': ['701', '605'], Other: ['312', '303', '480', '214'],
+};
+
+const HEROES = {
+  H1: { first: 'Erik', last: 'Lindgren', zip: '55420', archetype: 'pass', gender: 'm',
+    emails: ['erik.lindgren@example.com', 'elindgren.home@example.net'], phones: ['952-555-0148'] },
+  H2: { first: 'Katherine', last: 'Halvorsen', zip: '55125', archetype: 'member', gender: 'f',
+    emails: ['khalvorsen@example.org', 'katherine.halvorsen@arrowheadins.example'], phones: ['651-555-0183', '651-555-0129'] },
+  H3: { first: 'Dale', last: 'Brekke', zip: '56001', archetype: 'group_only', gender: 'm',
+    emails: ['dalebrekke@example.com', 'dbrekke@valleylutheranmankato.example'], phones: ['507-555-0162', '507-555-0110'] },
+  H4: { first: 'Jennifer', last: 'Solberg', zip: '55304', archetype: 'family', gender: 'f',
+    emails: ['jen.solberg@mail.example.com'], phones: ['763-555-0137'] },
+};
+const HERO_SLOTS = { H1: 2311, H2: 6107, H3: 11893, H4: 16457 };
+
+const DAY = 86400000;
+const OPENER = { 2024: [3, 4], 2025: [2, 31], 2026: [3, 2] }; // [monthIndex, day]
+
+function pad(n, w) { return String(n).padStart(w, '0'); }
+function isoDate(ms) { return new Date(ms).toISOString().slice(0, 10); }
+function cumulative(w) { let c = 0; return w.map((x) => (c += x)); }
+// Weighted pick over precomputed cumulative weights (hot paths).
+function cumPick(rand, items, cum) {
+  const x = rand() * cum[cum.length - 1];
+  for (let i = 0; i < cum.length; i++) if (x < cum[i]) return items[i];
+  return items[items.length - 1];
+}
+function round2(x) { return Math.round(x * 100) / 100; }
+function shuffle(rand, arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ---------- games ----------
+function makeGames(rand) {
+  const games = [];
+  const bySeason = {};
+  for (const yr of SEASONS) {
+    const list = [];
+    // Homestand sizes first, then road trips sized so the last home game lands in late September.
+    const stands = [];
+    for (let left = HOME_GAMES[yr]; left > 0; left -= stands[stands.length - 1]) {
+      stands.push(Math.min(left, pick(rand, [3, 4, 6, 7], [2, 3, 3, 2])));
+    }
+    const start = Date.UTC(yr, OPENER[yr][0], OPENER[yr][1]);
+    const span = Math.round((Date.UTC(yr, 8, 27) - start) / DAY) + 1;
+    const away = span - HOME_GAMES[yr];
+    let d = start;
+    stands.forEach((stand, si) => {
+      for (let i = 0; i < stand; i++) {
+        const dt = new Date(d);
+        const dow = dt.getUTCDay();
+        let dayType = 'weeknight';
+        if (dow === 0 || dow === 6) dayType = 'weekend';
+        else if (i === stand - 1 || rand() < 0.15) dayType = 'day';
+        const month = dt.getUTCMonth();
+        const monthW = [1, 1, 1, 0.82, 0.95, 1.1, 1.15, 1.05, 0.9, 0.85][month] || 1;
+        const typeW = dayType === 'weekend' ? 1.35 : dayType === 'day' ? 0.85 : 0.92;
+        list.push({
+          gameId: `${yr}-${pad(list.length + 1, 3)}`, season: yr, date: isoDate(d), dayType,
+          w: typeW * monthW * (list.length === 0 ? 1.6 : 1),
+        });
+        d += DAY;
+      }
+      const gaps = stands.length - 1;
+      if (si < gaps) d += DAY * (Math.floor(away * (si + 1) / gaps) - Math.floor(away * si / gaps));
+    });
+    let c = 0;
+    const cum = list.map((g) => (c += g.w));
+    bySeason[yr] = { list, cum, total: c };
+    games.push(...list);
+  }
+  return { games, bySeason };
+}
+
+// k distinct games from a season, weighted by game popularity.
+function sampleGames(rand, S, k) {
+  const n = S.list.length;
+  if (k >= n) return S.list.slice();
+  const mark = new Uint8Array(n);
+  let got = 0;
+  while (got < k) {
+    const x = rand() * S.total;
+    let lo = 0;
+    let hi = n - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (S.cum[mid] > x) hi = mid; else lo = mid + 1;
+    }
+    if (!mark[lo]) { mark[lo] = 1; got++; }
+  }
+  const out = [];
+  for (let i = 0; i < n; i++) if (mark[i]) out.push(S.list[i]);
+  return out;
+}
+
+// ---------- people ----------
+function makePeople(rand, size) {
+  const people = [];
+  const st = [];
+  const usedEmails = new Set();
+  const usedPhones = new Set();
+  const usedNameZip = new Set();
+  const archs = Object.keys(TUNE.archetypes);
+  const archW = archs.map((a) => TUNE.archetypes[a]);
+  const lastCum = cumulative(LAST.map((_, i) => 1 / Math.sqrt(i + 3)));
+  const zipPools = {};
+  for (const r of REGIONS) {
+    const zips = [];
+    const w = [];
+    for (const [a, b, wt] of ZIP_RANGES[r]) for (let z = a; z <= b; z++) { zips.push(pad(z, 5)); w.push(wt); }
+    zipPools[r] = { zips, cum: cumulative(w) };
+  }
+  for (const h of Object.values(HEROES)) {
+    h.emails.forEach((e) => usedEmails.add(e));
+    h.phones.forEach((p) => usedPhones.add(p));
+  }
+
+  function makePhone(region) {
+    for (;;) {
+      const area = AREA_CODES[region][Math.floor(rand() * AREA_CODES[region].length)];
+      intBetween(rand, 201, 989); // keeps the random stream aligned with earlier output
+      const p = `${area}-555-${pad(intBetween(rand, 0, 9999), 4)}`;
+      if (!usedPhones.has(p)) { usedPhones.add(p); return p; }
+    }
+  }
+  function makeEmail(first, last, work) {
+    const f = first.toLowerCase();
+    const l = last.toLowerCase();
+    const dom = work ? WORK_DOMAINS[Math.floor(rand() * WORK_DOMAINS.length)] : cumPick(rand, PERSONAL_DOMAINS, PERSONAL_CUM);
+    const styles = work ? [`${f}.${l}`, `${f[0]}${l}`, `${f}${l[0]}`]
+      : [`${f}.${l}`, `${f}${l}`, `${f[0]}${l}`, `${f}.${l}${intBetween(rand, 1, 99)}`, `${l}${f[0]}${intBetween(rand, 60, 99)}`, `${f}_${l}`];
+    let base = styles[Math.floor(rand() * styles.length)];
+    for (let n = 2; ; n++) {
+      const e = `${base}@${dom}`;
+      if (!usedEmails.has(e)) { usedEmails.add(e); return e; }
+      base = `${styles[0]}${n}`;
+    }
+  }
+
+  let hh = 0;
+  while (people.length < size) {
+    hh++;
+    const region = pick(rand, REGIONS, REGIONS.map((r) => REGION_W[r]));
+    const zp = zipPools[region];
+    const zip = cumPick(rand, zp.zips, zp.cum);
+    const last = cumPick(rand, LAST, lastCum);
+    const hsize = Math.min(size - people.length, pick(rand, [1, 2, 3, 4], [0.5, 0.32, 0.12, 0.06]));
+    const initials = new Set();
+    const headIdx = people.length;
+    for (let i = 0; i < hsize; i++) {
+      const teen = i >= 2 && rand() < TUNE.teenRate;
+      const gender = i === 0 ? (rand() < 0.5 ? 'm' : 'f') : i === 1 ? (people[headIdx].gender === 'm' ? 'f' : 'm') : (rand() < 0.5 ? 'm' : 'f');
+      const pool = gender === 'm' ? MALE : FEMALE;
+      let first;
+      for (let t = 0; t < 50; t++) {
+        first = pool[Math.floor(rand() * pool.length)];
+        if (!initials.has(first[0]) && !usedNameZip.has(`${first}|${last}|${zip}`)) break;
+      }
+      initials.add(first[0]);
+      usedNameZip.add(`${first}|${last}|${zip}`);
+      let archetype;
+      let role = null;
+      if (teen) { archetype = 'casual'; role = 'minor'; }
+      else if (i > 0 && people[headIdx].archetype === 'member' && rand() < 0.55) { archetype = 'casual'; role = 'recipient'; }
+      else archetype = pick(rand, archs, archW);
+      if (archetype === 'casual' && !role) role = rand() < 0.45 ? 'recipient' : 'one_game';
+      const emails = [makeEmail(first, last, false)];
+      if (!teen && rand() < 0.45) emails.push(makeEmail(first, last, rand() < 0.7));
+      const phones = [];
+      if (!teen || rand() < 0.5) phones.push(makePhone(region));
+      if (!teen && rand() < 0.25) phones.push(makePhone(region));
+      const pid = `P${pad(people.length + 1, 5)}`;
+      people.push({
+        pid, first, last, zip, region, emails, phones, householdId: `HH${pad(hh, 5)}`,
+        isMinor: teen, archetype, heroId: null, gender,
+      });
+      st.push({ role, head: headIdx });
+    }
+    // A teen in the house means the head buys tickets and sends some to them.
+    for (let i = headIdx + 2; i < people.length; i++) {
+      if (people[i].isMinor && !['member', 'single', 'triple_play', 'family'].includes(people[headIdx].archetype)) {
+        people[headIdx].archetype = pick(rand, ['member', 'single', 'triple_play'], [0.4, 0.3, 0.3]);
+      }
+    }
+  }
+
+  // Heroes replace single-person households at fixed slots so they flow through the same emitters.
+  const hhSize = new Map();
+  for (const p of people) hhSize.set(p.householdId, (hhSize.get(p.householdId) || 0) + 1);
+  for (const [hid, spec] of Object.entries(HEROES)) {
+    let i = Math.min(HERO_SLOTS[hid], people.length - 1);
+    while (i < people.length && hhSize.get(people[i].householdId) > 1) i++;
+    if (i >= people.length) i = Math.min(HERO_SLOTS[hid], people.length - 1);
+    const p = people[i];
+    Object.assign(p, {
+      first: spec.first, last: spec.last, zip: spec.zip, region: 'Home state', emails: spec.emails.slice(),
+      phones: spec.phones.slice(), archetype: spec.archetype, heroId: hid, gender: spec.gender, isMinor: false,
+    });
+    st[i].role = null;
+  }
+  return { people, st, makeEmail };
+}
+
+// ---------- contact variants (messy copies per source) ----------
+function makeVariantFactory(rand, people, makeEmail) {
+  const cache = new Map(); // key -> per-person array
+  const PHONE_FMT = {
+    ticketing: (d) => `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`,
+    fnb: (d) => d,
+    groups: (d) => `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`,
+    experiences: (d) => `+1 ${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`,
+    kidsClub: (d) => `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`,
+  };
+  function typo(s) {
+    const vowels = 'aeiou';
+    const idx = [];
+    for (let i = 1; i < s.length; i++) if (vowels.includes(s[i])) idx.push(i);
+    if (idx.length === 0) return s + s[s.length - 1];
+    const i = idx[Math.floor(rand() * idx.length)];
+    const others = vowels.replace(s[i], '');
+    return s.slice(0, i) + others[Math.floor(rand() * others.length)] + s.slice(i + 1);
+  }
+  function messName(p) {
+    if (rand() >= TUNE.nameMess) return `${p.first} ${p.last}`;
+    if (NICK[p.first] && rand() < 0.7) return `${NICK[p.first]} ${p.last}`;
+    return rand() < 0.5 ? `${typo(p.first)} ${p.last}` : `${p.first} ${typo(p.last)}`;
+  }
+  // source: ticketing|fnb|groups|experiences|kidsClub; key distinguishes extra accounts.
+  return function variant(i, source, key = source) {
+    let byPerson = cache.get(key);
+    if (!byPerson) { byPerson = new Array(people.length); cache.set(key, byPerson); }
+    if (byPerson[i]) return byPerson[i];
+    const p = people[i];
+    const name = messName(p);
+    let email = p.emails[0];
+    const pSecond = TUNE.secondEmail[key] ?? TUNE.secondEmail[source] ?? 0.2;
+    if (rand() < pSecond) {
+      if (p.emails.length < 2 && key.startsWith('ticketing_dup')) p.emails.push(makeEmail(p.first, p.last, false));
+      if (p.emails.length > 1) email = p.emails[1 + Math.floor(rand() * (p.emails.length - 1))];
+    }
+    if (rand() < 0.04) email = email[0].toUpperCase() + email.slice(1);
+    let phone = p.phones[0] || null;
+    const r = rand();
+    if (r < TUNE.missingPhone) phone = null;
+    else if (r < TUNE.missingPhone + TUNE.oldPhone && p.phones[1]) phone = p.phones[1];
+    const fmt = PHONE_FMT[source] || PHONE_FMT.ticketing;
+    const v = { name, email, phone: phone ? fmt(phone.replace(/\D/g, '')) : null, zip: p.zip };
+    byPerson[i] = v;
+    return v;
+  };
+}
+
+// ---------- season plans ----------
+function memberSpend(rand, plan, tier, premium) {
+  const m = premium ? 1.8 : 1;
+  if (plan === 'season_pre') return Math.round(intBetween(rand, 1800, 5600) * m);
+  if (plan === 'choice') return Math.round(intBetween(rand, 6, 75) * 100 * (premium ? 1.3 : 1));
+  if (plan === 'reserved') {
+    const base = tier === 'full' ? intBetween(rand, 3600, 6800) : tier === 'half' ? intBetween(rand, 1900, 3400) : intBetween(rand, 750, 1400);
+    return Math.round(base * m);
+  }
+  return Math.round(intBetween(rand, 450, 900) * m); // starter
+}
+const PASS_PRICE = { 2024: 179, 2025: 199, 2026: 229 };
+
+function planPerson(rand, p, s) {
+  const out = {};
+  const a = p.archetype;
+  const tr = TUNE.trend;
+  const singleSeason = (yr, prob) => {
+    if (rand() < prob * tr[yr]) {
+      const g = pick(rand, [1, 2, 3, 4], [0.55, 0.27, 0.12, 0.06]);
+      return { plan: 'single', own: g, spend: g * intBetween(rand, 28, 85) };
+    }
+    return null;
+  };
+  const triple = (yr) => {
+    const bundles = rand() < 0.15 ? 2 : 1;
+    const own = Math.max(1, bundles * 3 - (rand() < 0.3 ? 1 : 0));
+    return { plan: 'triple_play', own, spend: bundles * intBetween(rand, 95, 150) };
+  };
+  if (a === 'member') {
+    s.premiumOwn = rand() < 0.2;
+    s.seat = s.premiumOwn ? pick(rand, OWNED_PREMIUM, [3, 2, 2, 1]) : pick(rand, GENERAL_AREAS, [3, 3, 2, 1]);
+    const tierPlan = pick(rand, MEMBER_PLANS, [0.35, 0.45, 0.2]);
+    const resTier = pick(rand, ['full', 'half', 'twenty'], [0.35, 0.35, 0.3]);
+    const base = tierPlan === 'reserved' ? (resTier === 'full' ? intBetween(rand, 36, 58) : resTier === 'half' ? intBetween(rand, 20, 34) : intBetween(rand, 12, 18))
+      : tierPlan === 'choice' ? intBetween(rand, 14, 32) : intBetween(rand, 8, 16);
+    const churn = rand() < 0.08; // left after 2025
+    const leftEarly = !churn && rand() < 0.12; // held a 2024 season ticket, never joined the membership program
+    s.slipping = !churn && !leftEarly && rand() < 0.27;
+    const mg = TUNE.memberGames;
+    for (const yr of SEASONS) {
+      if (yr === 2024) {
+        if (rand() < 0.93) out[yr] = { plan: 'season_pre', own: Math.round(base * mg[yr] * (0.85 + rand() * 0.3)), spend: memberSpend(rand, 'season_pre', null, s.premiumOwn) };
+        else out[yr] = singleSeason(yr, 1);
+      } else if (leftEarly || (yr === 2026 && churn)) {
+        out[yr] = singleSeason(yr, 0.5);
+      } else {
+        let own = Math.round(base * mg[yr] * (0.85 + rand() * 0.3));
+        if (yr === 2026 && s.slipping) own = Math.max(1, Math.round(own * (0.15 + rand() * 0.4)));
+        out[yr] = { plan: tierPlan, own, spend: memberSpend(rand, tierPlan, resTier, s.premiumOwn) };
+      }
+      const o = out[yr];
+      if (o && o.plan !== 'single') {
+        o.xfer = yr === 2026 && s.slipping ? intBetween(rand, 6, 16) : intBetween(rand, 1, 8);
+        o.seat = s.seat;
+      }
+    }
+  } else if (a === 'pass') {
+    s.power = rand() < 0.42;
+    out[2026] = { plan: 'ballpark_pass', own: s.power ? intBetween(rand, 20, 38) : intBetween(rand, 3, 15), spend: PASS_PRICE[2026] };
+    out[2025] = pick(rand, ['pass', 'single', 'none'], [0.6, 0.25, 0.15]);
+    out[2024] = pick(rand, ['pass', 'single', 'triple', 'none'], [0.5, 0.3, 0.1, 0.1]);
+    for (const yr of [2024, 2025]) {
+      const k = out[yr];
+      out[yr] = k === 'pass' ? { plan: 'ballpark_pass', own: intBetween(rand, 8, yr === 2024 ? 34 : 28), spend: PASS_PRICE[yr] }
+        : k === 'single' ? singleSeason(yr, 1) : k === 'triple' ? triple(yr) : null;
+    }
+  } else if (a === 'triple_play') {
+    for (const yr of SEASONS) out[yr] = rand() < 0.78 * tr[yr] ? triple(yr) : singleSeason(yr, 0.5);
+  } else if (a === 'single') {
+    for (const yr of SEASONS) out[yr] = singleSeason(yr, 0.62);
+    if (!SEASONS.some((yr) => out[yr])) out[2024] = singleSeason(2024, 2);
+  } else if (a === 'lapsed_single') {
+    out[2024] = singleSeason(2024, 0.75);
+    out[2025] = singleSeason(2025, out[2024] ? 0.5 : 2);
+    out[2026] = null;
+  } else if (a === 'family') {
+    for (const yr of SEASONS) out[yr] = rand() < 0.4 ? triple(yr) : singleSeason(yr, 0.7);
+    if (!out[2026] || rand() < 0.15) out[2026] = rand() < 0.5 ? triple(2026) : singleSeason(2026, 2);
+  } else if (a === 'premium_curious') {
+    for (const yr of SEASONS) out[yr] = rand() < 0.4 ? triple(yr) : singleSeason(yr, yr === 2026 ? 0.9 : 0.6);
+  } else if (a === 'casual' && s.role === 'one_game') {
+    const yr = pick(rand, SEASONS, [1.4, 1, 0.75]);
+    out[yr] = { plan: 'single', own: 1, spend: intBetween(rand, 25, 70) };
+  }
+  return out;
+}
+
+const HERO_PLANS = {
+  H1: { 2024: { plan: 'triple_play', own: 3, spend: 129 }, 2025: { plan: 'ballpark_pass', own: 31, spend: 199 },
+    2026: { plan: 'ballpark_pass', own: 38, spend: 229 } },
+  H2: { 2024: { plan: 'season_pre', own: 41, spend: 4200, xfer: 6, seat: 'Main Level' },
+    2025: { plan: 'reserved', own: 44, spend: 5150, xfer: 5, seat: 'Main Level' },
+    2026: { plan: 'reserved', own: 12, spend: 5150, xfer: 26, seat: 'Main Level' } },
+  H3: { 2024: null, 2025: null, 2026: null },
+  H4: { 2024: { plan: 'single', own: 1, spend: 64 }, 2025: { plan: 'single', own: 2, spend: 118 },
+    2026: { plan: 'triple_play', own: 3, spend: 126 } },
+};
+
+// ---------- main ----------
+function generateWorld({ seed = SEED, size = SAMPLE_SIZE } = {}) {
+  const rand = mulberry32(seed);
+  const { games, bySeason } = makeGames(rand);
+  const { people, st, makeEmail } = makePeople(rand, size);
+  const variant = makeVariantFactory(rand, people, makeEmail);
+  const heroes = {};
+  people.forEach((p) => { if (p.heroId) heroes[p.heroId] = p.pid; });
+  const gateIds = GATES.map((g) => g.id);
+  const gateW = { G3: 0.13, G6: 0.16, G14: 0.14, G29: 0.24, G34: 0.33 };
+
+  // Hero contact mess, fixed so match evidence is visible on tab 5.
+  const heroIdx = {};
+  people.forEach((p, i) => { if (p.heroId) heroIdx[p.heroId] = i; });
+  const forced = new Map([
+    [`${heroIdx.H1}|ticketing`, { name: 'Erik Lindgren', email: 'erik.lindgren@example.com', phone: '952-555-0148', zip: '55420' }],
+    [`${heroIdx.H1}|fnb`, { name: 'Erik Lindgren', email: 'elindgren.home@example.net', phone: '9525550148', zip: '55420' }],
+    [`${heroIdx.H2}|ticketing`, { name: 'Katherine Halvorsen', email: 'khalvorsen@example.org', phone: '651-555-0183', zip: '55125' }],
+    [`${heroIdx.H2}|fnb`, { name: 'Kate Halvorsen', email: 'khalvorsen@example.org', phone: '6515550129', zip: '55125' }],
+    [`${heroIdx.H3}|groups`, { name: 'Dale Brekke', email: 'dbrekke@valleylutheranmankato.example', phone: '(507) 555-0162', zip: '56001' }],
+    [`${heroIdx.H3}|groups_attendee`, { name: 'Dale Brekke', email: 'dalebrekke@example.com', phone: null, zip: '56001' }],
+    [`${heroIdx.H3}|fnb`, { name: 'Dale Brekke', email: 'dalebrekke@example.com', phone: '5075550162', zip: '56001' }],
+    [`${heroIdx.H4}|ticketing`, { name: 'Jennifer Solberg', email: 'jen.solberg@mail.example.com', phone: '763-555-0137', zip: '55304' }],
+    [`${heroIdx.H4}|kidsClub`, { name: 'Jen Solberg', email: 'jen.solberg@mail.example.com', phone: null, zip: '55304' }],
+    [`${heroIdx.H4}|fnb`, { name: 'Jennifer Solburg', email: 'jen.solberg@mail.example.com', phone: '7635550137', zip: '55304' }],
+  ]);
+  const contact = (i, source, key = source) => (people[i].heroId && forced.get(`${i}|${key}`)) || variant(i, source, key);
+  const flags = (i) => ({ isMinor: people[i].isMinor, heroId: people[i].heroId });
+
+  // ---- behavior state per person ----
+  const attended = people.map(() => ({ 2024: 0, 2025: 0, 2026: 0 }));
+  const app = people.map((p) => {
+    if (p.heroId) return 1;
+    const r = TUNE.appUser[p.archetype] || 0;
+    if (rand() >= r) return 0;
+    return p.archetype === 'premium_curious' ? 0.85 : TUNE.identRate;
+  });
+  const fnbMult = people.map((p, i) => {
+    let m = 0.6 + rand() * 0.9;
+    if (p.archetype === 'premium_curious') m *= 3;
+    if (st[i].power) m *= 1.3;
+    if (p.heroId === 'H1') m = 2.2;
+    return m;
+  });
+  const plans = people.map((p, i) => (p.heroId ? HERO_PLANS[p.heroId] : planPerson(rand, p, st[i])));
+  if (people[heroIdx.H1]) st[heroIdx.H1].power = true;
+  if (people[heroIdx.H2]) st[heroIdx.H2].slipping = true;
+
+  // ---- ticketing accounts ----
+  const ticketing = [];
+  const primaryAcct = new Array(people.length).fill(null);
+  let tktN = 0;
+  function newAccount(i, key) {
+    const c = contact(i, 'ticketing', key);
+    const acct = {
+      tktId: `T${pad(++tktN, 6)}`, pid: people[i].pid, name: c.name, email: c.email, phone: c.phone, zip: c.zip,
+      seasons: {}, ...flags(i),
+    };
+    for (const yr of SEASONS) acct.seasons[yr] = { plan: 'none', ticketSpend: 0, transfersSent: 0, transfersReceived: 0, noShows: 0 };
+    ticketing.push(acct);
+    return acct;
+  }
+  const needsAccount = (i) => SEASONS.some((yr) => plans[i][yr]) || st[i].role === 'recipient' || st[i].role === 'minor'
+    || people[i].archetype === 'premium_curious';
+  for (let i = 0; i < people.length; i++) if (needsAccount(i)) primaryAcct[i] = newAccount(i, 'ticketing');
+
+  // Transfer circles: members send to household first, then to recipients and premium-curious fans.
+  const recipPool = shuffle(rand, people.map((p, i) => i).filter((i) => st[i].role === 'recipient' && people[st[i].head].archetype !== 'member'));
+  const curiousPool = shuffle(rand, people.map((p, i) => i).filter((i) => people[i].archetype === 'premium_curious' && !people[i].heroId));
+  const curiousViaTransfer = curiousPool.slice(0, Math.round(curiousPool.length * 0.65));
+  const curiousViaGroup = curiousPool.slice(curiousViaTransfer.length);
+  const circles = new Map();
+  let rp = 0;
+  let cp = 0;
+  people.forEach((p, i) => {
+    const plan = plans[i];
+    const sends = SEASONS.some((yr) => plan[yr] && plan[yr].xfer);
+    const hh = [];
+    for (let j = st[i].head; j < people.length && people[j].householdId === p.householdId; j++) {
+      if (j !== i && primaryAcct[j] && (st[j].role === 'recipient' || st[j].role === 'minor')) hh.push(j);
+    }
+    if (hh.some((j) => people[j].isMinor)) {
+      // Non-members with a teen send 1–2 tickets a season to them.
+      for (const yr of SEASONS) if (plan[yr] && !plan[yr].xfer) plan[yr].teenXfer = intBetween(rand, 1, 2);
+    }
+    if (!sends && !hh.length) return;
+    const c = hh.slice();
+    if (sends) {
+      const extra = intBetween(rand, 1, 3);
+      for (let k = 0; k < extra && rp < recipPool.length; k++) c.push(recipPool[rp++]);
+      if (st[i].premiumOwn) for (let k = 0; k < 3 && cp < curiousViaTransfer.length; k++) c.push(curiousViaTransfer[cp++]);
+      if (people[i].heroId === 'H2' && rp < recipPool.length) c.push(recipPool[rp++]);
+    }
+    circles.set(i, c);
+  });
+  // Leftover recipients attach to members round-robin so every recipient account sees a transfer.
+  const senders = [...circles.keys()].filter((i) => SEASONS.some((yr) => plans[i][yr] && plans[i][yr].xfer));
+  for (let k = 0; rp < recipPool.length && senders.length; k++) circles.get(senders[k % senders.length]).push(recipPool[rp++]);
+  for (let k = 0; cp < curiousViaTransfer.length; k++) {
+    const prem = senders.filter((i) => st[i].premiumOwn);
+    if (!prem.length) break;
+    circles.get(prem[k % prem.length]).push(curiousViaTransfer[cp++]);
+  }
+
+  // ---- scans and F&B ----
+  const scans = [];
+  const fnbIdentified = [];
+  const anonByGame = new Map();
+  for (const g of games) anonByGame.set(g.gameId, { gameId: g.gameId, season: g.season, txns: 0, revenue: 0, byCategory: { food: 0, beverage: 0, merch: 0 } });
+  let scanN = 0;
+  let txnN = 0;
+  const gateCum = cumulative(gateIds.map((g) => gateW[g]));
+  const prefGate = people.map(() => cumPick(rand, gateIds, gateCum));
+  function gateFor(i) {
+    if (i !== null && rand() < 0.7) return prefGate[i];
+    return cumPick(rand, gateIds, gateCum);
+  }
+  function fnbTxn(i, gameId, season, category, venue, amount) {
+    const c = contact(i, 'fnb');
+    fnbIdentified.push({
+      txnId: `F${pad(++txnN, 7)}`, gameId, season, venue, category, amount: round2(amount),
+      name: c.name, email: c.email, phone: c.phone, zip: c.zip, pid: people[i].pid, ...flags(i),
+    });
+  }
+  function inParkSpend(i, game) {
+    const r = rand();
+    let n = r < 0.25 ? 0 : r < 0.65 ? 1 : r < 0.9 ? 2 : 3; // mean 1.2 per scan
+    if (i !== null && people[i].heroId) n = Math.max(1, n);
+    const mult = i === null ? 0.6 + rand() * 0.9 : fnbMult[i];
+    for (let k = 0; k < n; k++) {
+      const rc = rand();
+      const category = rc < 0.5 ? 'food' : rc < 0.88 ? 'beverage' : 'merch';
+      const amount = (category === 'food' ? 8 + rand() * 14 : category === 'beverage' ? 7 + rand() * 9 : 25 + rand() * 65) * mult;
+      if (i !== null && app[i] && rand() < app[i]) {
+        const venue = category === 'merch' ? 'team_store' : rand() < 0.7 ? 'mobile' : 'concessions';
+        fnbTxn(i, game.gameId, game.season, category, venue, amount);
+      } else {
+        const a = anonByGame.get(game.gameId);
+        a.txns++;
+        a.revenue += amount;
+        a.byCategory[category] += amount;
+      }
+    }
+  }
+  function scan(i, game, seatArea, tktId, viaTransfer, bookingId) {
+    scans.push({
+      scanId: `S${pad(++scanN, 7)}`, gameId: game.gameId, season: game.season, gate: gateFor(i), seatArea,
+      tktId, viaTransfer, bookingId, pid: i === null ? null : people[i].pid,
+    });
+    if (i !== null) attended[i][game.season]++;
+    inParkSpend(i, game);
+  }
+
+  const dupAcct = new Map();
+  for (let i = 0; i < people.length; i++) {
+    const plan = plans[i];
+    for (const yr of SEASONS) {
+      const o = plan[yr];
+      if (!o) continue;
+      let acct = primaryAcct[i];
+      const isPlanHolder = o.plan === 'ballpark_pass' || MEMBER_PLANS.includes(o.plan) || o.plan === 'season_pre';
+      if (!people[i].heroId && !isPlanHolder && rand() < TUNE.dupAccount) {
+        if (!dupAcct.has(i)) dupAcct.set(i, newAccount(i, 'ticketing_dup'));
+        acct = dupAcct.get(i);
+      }
+      const own = o.own;
+      const xfer = o.xfer || 0;
+      const picked = sampleGames(rand, bySeason[yr], Math.min(bySeason[yr].list.length, own + xfer));
+      shuffle(rand, picked);
+      const ownGames = picked.slice(0, own);
+      const xferGames = picked.slice(own);
+      const seat = o.plan === 'ballpark_pass' ? STANDING : (o.seat || null);
+      for (const g of ownGames) scan(i, g, seat || cumPick(rand, GENERAL_AREAS, AREA_CUM), acct.tktId, false, null);
+      const circle = circles.get(i) || [];
+      let sent = 0;
+      if (circle.length) {
+        for (const g of xferGames) {
+          const r = circle[Math.floor(rand() * circle.length)];
+          primaryAcct[r].seasons[yr].transfersReceived++;
+          scan(r, g, seat || cumPick(rand, GENERAL_AREAS, AREA_CUM), primaryAcct[r].tktId, true, null);
+          sent++;
+        }
+        const teens = circle.filter((j) => people[j].isMinor);
+        for (let k = 0; k < (o.teenXfer || 0) && teens.length && ownGames.length; k++) {
+          const r = teens[Math.floor(rand() * teens.length)];
+          const g = ownGames[Math.floor(rand() * ownGames.length)];
+          primaryAcct[r].seasons[yr].transfersReceived++;
+          scan(r, g, cumPick(rand, GENERAL_AREAS, AREA_CUM), primaryAcct[r].tktId, true, null);
+          sent++;
+        }
+      }
+      const planGames = MEMBER_PLANS.includes(o.plan) || o.plan === 'season_pre' ? own + xfer + intBetween(rand, 1, 6) : own;
+      const s = acct.seasons[yr];
+      s.plan = o.plan;
+      s.ticketSpend += o.spend;
+      s.transfersSent += sent;
+      s.noShows += o.plan === 'ballpark_pass' ? 0 : Math.max(0, planGames - own - xfer) + (rand() < 0.08 ? 1 : 0);
+    }
+  }
+
+  // ---- groups ----
+  const groups = [];
+  const organizers = new Set();
+  let bkN = 0;
+  const groupOnly = people.map((p, i) => i).filter((i) => people[i].archetype === 'group_only' && !people[i].heroId);
+  const slots = [];
+  for (const i of groupOnly) {
+    const n = pick(rand, [1, 2, 3, 4], [0.35, 0.38, 0.18, 0.09]);
+    for (let k = 0; k < n; k++) slots.push(i);
+  }
+  shuffle(rand, slots);
+  const organizerPool = people.map((p, i) => i).filter((i) => ['member', 'single', 'triple_play', 'family'].includes(people[i].archetype) && !people[i].isMinor && !people[i].heroId);
+  let sp = 0;
+  let gp = 0;
+  function groupGame(yr) {
+    const S = bySeason[yr];
+    const weekendish = S.list.filter((g) => g.dayType !== 'weeknight');
+    return rand() < 0.65 ? weekendish[Math.floor(rand() * weekendish.length)] : S.list[Math.floor(rand() * S.list.length)];
+  }
+  function addBooking(yr, type, organizerIdx, orgKey, knownIdx, opts = {}) {
+    const g = opts.game || groupGame(yr);
+    const size = opts.size || 20 + Math.floor(rand() * rand() * 110);
+    const premium = opts.premium ?? (type === 'Corporate' && rand() < 0.35);
+    const seat = premium ? pick(rand, GROUP_PREMIUM, [2, 2, 1]) : pick(rand, ['Outfield Bleachers', 'Upper Level', 'Main Level'], [3, 2, 1]);
+    const price = premium ? 95 + rand() * 60 : 26 + rand() * 24;
+    const bookingId = `G${pad(++bkN, 5)}`;
+    const oc = contact(organizerIdx, 'groups', orgKey);
+    organizers.add(organizerIdx);
+    const known = [];
+    const seen = new Set([organizerIdx]);
+    for (const k of knownIdx) {
+      if (seen.has(k)) continue;
+      seen.add(k);
+      const c = contact(k, 'groups', 'groups_attendee');
+      known.push({ name: c.name, email: c.email, zip: c.zip, pid: people[k].pid, ...flags(k) });
+    }
+    groups.push({
+      bookingId, season: yr, gameId: g.gameId, type, size, amount: Math.round(size * price),
+      organizer: { name: oc.name, email: oc.email, phone: oc.phone, zip: oc.zip, pid: people[organizerIdx].pid, ...flags(organizerIdx) },
+      knownAttendees: known, seatArea: seat,
+    });
+    const showing = Math.round(size * (0.88 + rand() * 0.1));
+    const named = [organizerIdx, ...[...seen].filter((k) => k !== organizerIdx)];
+    for (let k = 0; k < showing; k++) scan(k < named.length ? named[k] : null, g, seat, null, false, bookingId);
+  }
+  // Hero H3: church outings in 2025 and 2026 as organizer, a youth sports outing in 2024 as a known attendee.
+  if (heroIdx.H3 !== undefined) {
+    const h = heroIdx.H3;
+    const other = organizerPool[Math.floor(rand() * organizerPool.length)];
+    addBooking(2024, 'Youth sports', other, 'groups', [h], { size: 34 });
+    addBooking(2025, 'Church', h, 'groups', [], { size: 48, premium: false });
+    addBooking(2026, 'Church', h, 'groups', [], { size: 52, premium: false });
+  }
+  for (const yr of SEASONS) {
+    for (let b = 0; b < TUNE.groupBookings[yr]; b++) {
+      const type = pick(rand, GROUP_TYPES, [0.25, 0.22, 0.15, 0.12, 0.1, 0.16]);
+      let org;
+      if (sp >= slots.length || rand() < (type === 'Corporate' ? TUNE.organizerFromBuyers.corporate : TUNE.organizerFromBuyers.other)) org = organizerPool[Math.floor(rand() * organizerPool.length)];
+      else org = slots[sp++];
+      const nKnown = pick(rand, [0, 1, 2, 3, 4, 5], [0.2, 0.25, 0.22, 0.15, 0.1, 0.08]);
+      const known = [];
+      for (let k = 0; k < nKnown && sp < slots.length; k++) known.push(slots[sp++]);
+      const premium = type === 'Corporate' && (gp < curiousViaGroup.length ? rand() < 0.6 : rand() < 0.35);
+      if (premium && gp < curiousViaGroup.length) known.push(curiousViaGroup[gp++]);
+      addBooking(yr, type, org, 'groups', known, { premium });
+    }
+  }
+  // Remaining slots: extra small social outings so every group-only fan appears.
+  while (sp < slots.length) {
+    const yr = pick(rand, SEASONS, [1, 1, 1]);
+    const org = slots[sp++];
+    const known = [];
+    while (known.length < 2 && sp < slots.length) known.push(slots[sp++]);
+    addBooking(yr, 'Social', org, 'groups', known);
+  }
+  while (gp < curiousViaGroup.length) {
+    const yr = pick(rand, SEASONS, [1, 1, 1]);
+    addBooking(yr, 'Corporate', organizerPool[Math.floor(rand() * organizerPool.length)], 'groups', [curiousViaGroup[gp++]], { premium: true });
+  }
+
+  // ---- non-game retail: Team Store and app merch ----
+  for (let i = 0; i < people.length; i++) {
+    const a = people[i].archetype;
+    for (const yr of SEASONS) {
+      let n = 0;
+      if (a === 'retail_only') n = rand() < 0.62 * TUNE.trend[yr] ? pick(rand, [1, 2, 3], [0.6, 0.3, 0.1]) : 0;
+      else if (a === 'lapsed_single' && yr === 2026) n = rand() < 0.65 ? pick(rand, [1, 2], [0.7, 0.3]) : 0;
+      else if (a === 'member' && rand() < 0.02) n = 1;
+      if (people[i].heroId === 'H4' && yr === 2026) n = 2;
+      for (let k = 0; k < n; k++) {
+        const venue = rand() < 0.65 ? 'team_store' : 'mobile';
+        fnbTxn(i, null, yr, 'merch', venue, 22 + rand() * 90);
+      }
+    }
+  }
+
+  // ---- experiences ----
+  const experiences = [];
+  let expN = 0;
+  const expBuyerArch = ['member', 'premium_curious', 'family', 'single', 'triple_play', 'pass'];
+  const byArch = {};
+  for (const a of expBuyerArch) byArch[a] = people.map((p, i) => i).filter((i) => people[i].archetype === a && !people[i].heroId && !people[i].isMinor);
+  for (const yr of SEASONS) {
+    for (let e = 0; e < TUNE.experiences[yr]; e++) {
+      const kind = pick(rand, ['tour', 'suite', 'rooftop_deck'], [0.55, 0.25, 0.2]);
+      const a = pick(rand, expBuyerArch, TUNE.expBuyers);
+      if (!byArch[a].length) continue;
+      const i = byArch[a][Math.floor(rand() * byArch[a].length)];
+      const amount = kind === 'tour' ? intBetween(rand, 2, 6) * (rand() < 0.15 ? 95 : intBetween(rand, 22, 30))
+        : kind === 'suite' ? intBetween(rand, 25, 90) * 100 : intBetween(rand, 6, 24) * 100;
+      const c = contact(i, 'experiences');
+      experiences.push({
+        expId: `E${pad(++expN, 5)}`, season: yr, kind, amount,
+        buyer: { name: c.name, email: c.email, phone: c.phone, zip: c.zip, pid: people[i].pid, ...flags(i) },
+      });
+    }
+  }
+
+  // ---- Kids Club ----
+  const kidsClub = [];
+  let kcN = 0;
+  for (let i = 0; i < people.length; i++) {
+    if (people[i].archetype !== 'family') continue;
+    const nKids = people[i].heroId === 'H4' ? 2 : pick(rand, [1, 2, 3], [0.55, 0.35, 0.1]);
+    const c = contact(i, 'kidsClub');
+    const used = new Set();
+    for (let k = 0; k < nKids; k++) {
+      let child;
+      do child = KIDS[Math.floor(rand() * KIDS.length)]; while (used.has(child));
+      used.add(child);
+      const joinYr = pick(rand, SEASONS, [1, 1, 1.2]);
+      kidsClub.push({
+        kcId: `K${pad(++kcN, 5)}`, childFirst: child, birthYear: intBetween(rand, 2013, 2021),
+        joinDate: isoDate(Date.UTC(joinYr, intBetween(rand, 0, 5), intBetween(rand, 1, 28))),
+        parent: { name: c.name, email: c.email, phone: c.phone, zip: c.zip, pid: people[i].pid, ...flags(i) },
+      });
+    }
+  }
+
+  // ---- surveys ----
+  const surveys = [];
+  let respN = 0;
+  // Respondents without an account use the group contact they actually gave (organizer or attendee).
+  const acctEmail = (i) => (primaryAcct[i] ? primaryAcct[i].email
+    : contact(i, 'groups', organizers.has(i) ? 'groups' : 'groups_attendee').email);
+  for (let i = 0; i < people.length; i++) {
+    const p = people[i];
+    if (p.isMinor) continue;
+    for (const yr of SEASONS) {
+      if (!attended[i][yr]) continue;
+      const planNow = plans[i][yr] && plans[i][yr].plan;
+      const isMember = MEMBER_PLANS.includes(planNow) || planNow === 'season_pre';
+      let prob = isMember ? 0.22 : TUNE.surveyRate;
+      if (st[i].slipping && yr === 2026) prob = 0.7;
+      let force = false;
+      if (p.heroId === 'H2' && yr >= 2025) force = true;
+      if (p.heroId === 'H4' && yr === 2026) force = true;
+      if (!force && rand() >= prob) continue;
+      let sat = st[i].slipping && yr === 2026 ? intBetween(rand, 2, 5) : pick(rand, [4, 5, 6, 7, 8, 9, 10], [0.04, 0.06, 0.1, 0.18, 0.26, 0.21, 0.15]);
+      if (p.heroId === 'H2') sat = yr === 2026 ? 3 : 8;
+      if (p.heroId === 'H4') sat = 9;
+      const renewalIntent = sat >= 8 ? 'likely' : sat >= 5 ? (rand() < 0.75 ? 'unsure' : 'likely') : (rand() < 0.8 ? 'unlikely' : 'unsure');
+      surveys.push({ respId: `R${pad(++respN, 5)}`, season: yr, email: acctEmail(i), satisfaction: sat, renewalIntent, pid: p.pid, ...flags(i) });
+    }
+  }
+
+  // ---- consent and do-not-contact ----
+  const consent = [];
+  const dnc = [];
+  const emailSource = new Map();
+  const phoneSource = new Map();
+  const appEmail = new Set();
+  const minorContact = new Set();
+  const note = (map, k, src) => { if (k && !map.has(k)) map.set(k, src); };
+  for (const t of ticketing) { note(emailSource, t.email, 'Ticketing account'); note(phoneSource, t.phone, 'Ticketing account'); if (t.isMinor) minorContact.add(t.email); }
+  for (const f of fnbIdentified) { note(emailSource, f.email, f.venue === 'mobile' ? 'Mobile order' : 'Team Store checkout'); note(phoneSource, f.phone, 'Mobile order'); appEmail.add(f.email); }
+  for (const g of groups) { note(emailSource, g.organizer.email, 'Group booking form'); note(phoneSource, g.organizer.phone, 'Group booking form'); for (const k of g.knownAttendees) note(emailSource, k.email, 'Group booking link'); }
+  for (const e of experiences) { note(emailSource, e.buyer.email, 'Experience purchase'); note(phoneSource, e.buyer.phone, 'Experience purchase'); }
+  for (const k of kidsClub) { note(emailSource, k.parent.email, 'Kids Club enrollment'); note(phoneSource, k.parent.phone, 'Kids Club enrollment'); }
+  for (let i = 0; i < people.length; i++) if (app[i] && primaryAcct[i]) appEmail.add(primaryAcct[i].email);
+  const dateStrings = Array.from({ length: 1400 }, (_, k) => isoDate(Date.UTC(2023, 0, 1) + k * DAY));
+  const consentDate = () => dateStrings[Math.floor(rand() * dateStrings.length)];
+  for (const [email, source] of emailSource) {
+    const minor = minorContact.has(email);
+    const status = pick(rand, ['opt_in', 'opt_out', 'none'], minor ? [0.6, 0.05, 0.35] : [0.5, 0.1, 0.4]);
+    consent.push({ contact: email, channel: 'email', status, source, date: status === 'none' ? null : consentDate() });
+    if (appEmail.has(email)) {
+      const ps = pick(rand, ['opt_in', 'opt_out', 'none'], [0.55, 0.15, 0.3]);
+      consent.push({ contact: email, channel: 'push', status: ps, source: 'Team app', date: ps === 'none' ? null : consentDate() });
+    }
+    if (rand() < 0.015) dnc.push(email);
+  }
+  for (const [phone, source] of phoneSource) {
+    const status = pick(rand, ['opt_in', 'opt_out', 'none'], [0.22, 0.08, 0.7]);
+    consent.push({ contact: phone, channel: 'sms', status, source, date: status === 'none' ? null : consentDate() });
+    if (rand() < 0.01) dnc.push(phone);
+  }
+
+  const fnbAnonymous = [...anonByGame.values()].map((a) => ({
+    gameId: a.gameId, season: a.season, txns: a.txns, revenue: round2(a.revenue),
+    byCategory: { food: round2(a.byCategory.food), beverage: round2(a.byCategory.beverage), merch: round2(a.byCategory.merch) },
+  }));
+
+  return {
+    games: games.map(({ gameId, season, date, dayType }) => ({ gameId, season, date, dayType })),
+    people: people.map(({ gender, ...p }) => p),
+    ticketing, scans, fnbIdentified, fnbAnonymous, groups, experiences, surveys, kidsClub, consent, dnc, heroes,
+  };
+}
+
+module.exports = { generateWorld, TUNE, STANDING };
+
+},
+"linkage.js": function (module, exports, require) {
+// Identity resolution over the per-system source records.
+//
+// Node id scheme (cluster.nodes[].source + id), so later code can map back to world records:
+//   ticketing    id = tktId                       -> world.ticketing[].tktId
+//   fnb          id = txnId of the first identified transaction for a distinct name+email+phone
+//                (identical contacts are deduped; other txns with the same contact share that node)
+//   groups       id = `${bookingId}:organizer`    -> world.groups[].organizer
+//                id = `${bookingId}:attendee:${k}` -> world.groups[].knownAttendees[k]
+//   experiences  id = expId                       -> world.experiences[].buyer
+//   surveys      id = respId                      -> world.surveys[]
+//   kidsClub     id = kcId of the first row for a distinct parent name+email+phone
+// Anonymous F&B and Kids Club children are not nodes. Each node also carries isMinor and heroId.
+//
+// Match stats are all in node-PAIR units. For a group of k nodes sharing an email (or phone) we count
+// the k-1 spanning pairs (first node to each other node), not all k(k-1)/2 pairs. A phone pair whose
+// two nodes also share an email is attributed to email only.
+//   byMethod.email / .phone = spanning pairs by key; byMethod.fuzzy = fuzzy pairs that merged clusters
+//   byConfidence.high = email + phone, medium = fuzzy, low = lowCandidates pairs (= lowUnmerged)
+//   candidateMatches = high + medium + low
+// lowCandidates: same last name + zip, not merged, first names plausibly the same person
+// (same first initial or Jaro-Winkler >= 0.80) but failing the merge test.
+
+const NICKNAMES = {
+  bob: 'robert', bill: 'william', kate: 'katherine', jim: 'james', mike: 'michael',
+  liz: 'elizabeth', tom: 'thomas', jen: 'jennifer',
+};
+
+function soundex(str) {
+  const s = String(str || '').toUpperCase().replace(/[^A-Z]/g, '');
+  if (!s) return '';
+  const codes = { B: 1, F: 1, P: 1, V: 1, C: 2, G: 2, J: 2, K: 2, Q: 2, S: 2, X: 2, Z: 2, D: 3, T: 3, L: 4, M: 5, N: 5, R: 6 };
+  let out = s[0];
+  let prev = codes[s[0]] || 0;
+  for (let i = 1; i < s.length && out.length < 4; i++) {
+    const ch = s[i];
+    const c = codes[ch] || 0;
+    if (c && c !== prev) out += c;
+    if (ch !== 'H' && ch !== 'W') prev = c;
+  }
+  return (out + '000').slice(0, 4);
+}
+
+function jaroWinkler(a, b) {
+  if (a === b) return 1;
+  const la = a.length, lb = b.length;
+  if (!la || !lb) return 0;
+  const win = Math.max(0, Math.floor(Math.max(la, lb) / 2) - 1);
+  const ma = new Array(la).fill(false), mb = new Array(lb).fill(false);
+  let m = 0;
+  for (let i = 0; i < la; i++) {
+    const lo = Math.max(0, i - win), hi = Math.min(lb - 1, i + win);
+    for (let j = lo; j <= hi; j++) {
+      if (!mb[j] && a[i] === b[j]) { ma[i] = mb[j] = true; m++; break; }
+    }
+  }
+  if (!m) return 0;
+  let t = 0, k = 0;
+  for (let i = 0; i < la; i++) {
+    if (!ma[i]) continue;
+    while (!mb[k]) k++;
+    if (a[i] !== b[k]) t++;
+    k++;
+  }
+  const jaro = (m / la + m / lb + (m - t / 2) / m) / 3;
+  let l = 0;
+  while (l < 4 && l < la && l < lb && a[l] === b[l]) l++;
+  return jaro + l * 0.1 * (1 - jaro);
+}
+
+const normEmail = (e) => String(e || '').trim().toLowerCase();
+const normPhone = (p) => String(p || '').replace(/\D/g, '');
+function splitName(name) {
+  const parts = String(name || '').toLowerCase().replace(/[^a-z\s'-]/g, ' ').split(/\s+/).filter(Boolean);
+  if (!parts.length) return { first: '', last: '' };
+  return { first: parts[0], last: parts.length > 1 ? parts[parts.length - 1] : '' };
+}
+const canonFirst = (f) => NICKNAMES[f] || f;
+
+function resolveIdentities(world) {
+  // ---- build nodes ----
+  const nodes = [];
+  function addNode(source, id, rec) {
+    const { first, last } = splitName(rec.name);
+    nodes.push({
+      source, id, name: rec.name || '', first, last, zip: rec.zip || '',
+      email: normEmail(rec.email), phone: normPhone(rec.phone),
+      isMinor: !!rec.isMinor, heroId: rec.heroId || null,
+    });
+  }
+  for (const t of world.ticketing) addNode('ticketing', t.tktId, t);
+  const seenFnb = new Set();
+  for (const f of world.fnbIdentified) {
+    const k = `${String(f.name).toLowerCase()}|${normEmail(f.email)}|${normPhone(f.phone)}`;
+    if (seenFnb.has(k)) continue;
+    seenFnb.add(k);
+    addNode('fnb', f.txnId, f);
+  }
+  for (const g of world.groups) {
+    addNode('groups', `${g.bookingId}:organizer`, g.organizer);
+    g.knownAttendees.forEach((a, k) => addNode('groups', `${g.bookingId}:attendee:${k}`, a));
+  }
+  for (const e of world.experiences) addNode('experiences', e.expId, e.buyer);
+  for (const s of world.surveys) addNode('surveys', s.respId, s);
+  const seenKc = new Set();
+  for (const k of world.kidsClub) {
+    const p = k.parent;
+    const key = `${String(p.name).toLowerCase()}|${normEmail(p.email)}|${normPhone(p.phone)}`;
+    if (seenKc.has(key)) continue;
+    seenKc.add(key);
+    addNode('kidsClub', k.kcId, p);
+  }
+  const n = nodes.length;
+
+  // ---- union-find ----
+  const parent = new Int32Array(n);
+  for (let i = 0; i < n; i++) parent[i] = i;
+  const find = (x) => {
+    while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; }
+    return x;
+  };
+  const byMethod = { email: 0, phone: 0, fuzzy: 0 };
+  const mergeEdges = []; // [a, b, method]
+  function link(a, b, method) {
+    const ra = find(a), rb = find(b);
+    if (ra === rb) return;
+    parent[rb] = ra;
+    mergeEdges.push([a, b, method]);
+  }
+
+  // exact keys (star edges to the first node holding the value)
+  for (const [field, method] of [['email', 'email'], ['phone', 'phone']]) {
+    const first = new Map();
+    for (let i = 0; i < n; i++) {
+      const v = nodes[i][field];
+      if (!v) continue;
+      if (first.has(v)) {
+        const f = first.get(v);
+        const dupOfEmail = method === 'phone' && nodes[f].email && nodes[f].email === nodes[i].email;
+        if (!dupOfEmail) byMethod[method]++;
+        link(f, i, method);
+      }
+      else first.set(v, i);
+    }
+  }
+
+  // fuzzy within blocking key; same last+zip failing the test becomes a low candidate
+  const blocks = new Map();
+  const lastZip = new Map();
+  for (let i = 0; i < n; i++) {
+    const x = nodes[i];
+    if (!x.zip || !x.last || !x.first) continue;
+    const cf = canonFirst(x.first);
+    x.cf = cf;
+    const bk = `${x.zip}|${soundex(x.last)}|${cf[0]}`;
+    if (!blocks.has(bk)) blocks.set(bk, []);
+    blocks.get(bk).push(i);
+    const lz = `${x.zip}|${x.last}`;
+    if (!lastZip.has(lz)) lastZip.set(lz, []);
+    lastZip.get(lz).push(i);
+  }
+  for (const list of blocks.values()) {
+    for (let a = 0; a < list.length; a++) {
+      for (let b = a + 1; b < list.length; b++) {
+        const x = nodes[list[a]], y = nodes[list[b]];
+        if (find(list[a]) === find(list[b])) continue;
+        if (x.cf === y.cf || jaroWinkler(x.first, y.first) >= 0.92) { byMethod.fuzzy++; link(list[a], list[b], 'fuzzy'); }
+      }
+    }
+  }
+  const lowPairs = [];
+  for (const list of lastZip.values()) {
+    for (let a = 0; a < list.length; a++) {
+      for (let b = a + 1; b < list.length; b++) {
+        if (find(list[a]) === find(list[b])) continue;
+        const x = nodes[list[a]], y = nodes[list[b]];
+        if (x.first[0] === y.first[0] || x.cf[0] === y.cf[0] || jaroWinkler(x.first, y.first) >= 0.8) lowPairs.push([list[a], list[b]]);
+      }
+    }
+  }
+
+  // ---- assemble clusters ----
+  const groupsByRoot = new Map();
+  for (let i = 0; i < n; i++) {
+    const r = find(i);
+    if (!groupsByRoot.has(r)) groupsByRoot.set(r, []);
+    groupsByRoot.get(r).push(i);
+  }
+  const clusterIdx = new Map();
+  const clusters = [];
+  for (const [root, members] of groupsByRoot) {
+    const emails = new Set(), phones = new Set();
+    const nameCount = new Map(), zipCount = new Map();
+    for (const i of members) {
+      const x = nodes[i];
+      if (x.email) emails.add(x.email);
+      if (x.phone) phones.add(x.phone);
+      if (x.name) nameCount.set(x.name, (nameCount.get(x.name) || 0) + 1);
+      if (x.zip) zipCount.set(x.zip, (zipCount.get(x.zip) || 0) + 1);
+    }
+    const top = (m) => { let best = '', bc = 0; for (const [k, c] of m) if (c > bc) { best = k; bc = c; } return best; };
+    const c = {
+      clusterId: `C${String(clusters.length + 1).padStart(6, '0')}`,
+      nodes: members.map((i) => ({ source: nodes[i].source, id: nodes[i].id, isMinor: nodes[i].isMinor, heroId: nodes[i].heroId })),
+      emails: [...emails], phones: [...phones],
+      name: top(nameCount), zip: top(zipCount),
+      confidence: 'high', evidence: [], lowCandidates: [],
+    };
+    clusterIdx.set(root, c);
+    clusters.push(c);
+  }
+  for (const [a, b, method] of mergeEdges) {
+    const c = clusterIdx.get(find(a));
+    c.evidence.push({ a: nodes[a].id, b: nodes[b].id, method });
+    if (method === 'fuzzy') c.confidence = 'medium';
+  }
+  for (const [a, b] of lowPairs) {
+    const ref = (i) => ({ source: nodes[i].source, id: nodes[i].id });
+    clusterIdx.get(find(a)).lowCandidates.push({ nodeA: ref(a), nodeB: ref(b) });
+  }
+
+  const byConfidence = { high: byMethod.email + byMethod.phone, medium: byMethod.fuzzy, low: lowPairs.length };
+  const candidateMatches = byConfidence.high + byConfidence.medium + byConfidence.low;
+  return {
+    clusters,
+    stats: {
+      sourceRecords: n, candidateMatches, resolvedFans: clusters.length,
+      byMethod, byConfidence, lowUnmerged: lowPairs.length,
+    },
+  };
+}
+
+module.exports = { resolveIdentities, soundex, jaroWinkler };
+
+},
+"model.js": function (module, exports, require) {
+// Single entry point used by the UI and tests: world → linkage → fans → view models.
+const config = require('./config');
+const { generateWorld } = require('./generate');
+const { resolveIdentities } = require('./linkage');
+const { buildFans } = require('./fans');
+const { ticketingView, fnbView, groupsView } = require('./views-systems');
+const { fan360View } = require('./views-fan360');
+const { computeRecommendations } = require('./recommendations');
+
+function buildModel(cfg = config) {
+  const world = generateWorld({ seed: cfg.SEED, size: cfg.SAMPLE_SIZE });
+  const linkage = resolveIdentities(world);
+  const fans = buildFans(world, linkage);
+  const fanById = new Map(fans.map((f) => [f.fanId, f]));
+  const views = {
+    ticketing: ticketingView(world),
+    fnb: fnbView(world),
+    groups: groupsView(world),
+    fan360: fan360View(world, linkage, fans),
+  };
+  return { world, linkage, fans, fanById, views, recommendations: computeRecommendations(fans) };
+}
+
+module.exports = { buildModel };
+
+},
+"recommendations.js": function (module, exports, require) {
+// Tab 7: pattern-detection rules expressed as tab 6 filter specs, scored into ranked cards.
+const { applyFilters, consentWaterfall } = require('./segments');
+const { scaled, fmtCount, fmtPct } = require('./format');
+
+const RANKING_NOTE = 'Ranked by projected incremental 2027 ticket and F&B revenue from the eligible audience.';
+
+const RULES = [
+  {
+    id: 'pass_power', name: 'Ballpark Pass power users',
+    ruleText: 'Ballpark Pass holders in 2026 who attended 20 or more games and sit in the top half of F&B spend.',
+    filters: { plan2026: ['ballpark_pass'], games2026Min: 20, fnbPercentile2026Min: 50 },
+    conversionRate: 0.08, valuePerConversion: 640,
+    valueAssumption: 'Assumes 8% take the 2027 Member Starter offer, worth about $640 each in added ticket and F&B revenue over a Ballpark Pass.',
+    whyNow: 'Offer a 2027 Member Starter upgrade before Ballpark Pass goes on sale in February.',
+    heroId: 'H1',
+  },
+  {
+    id: 'slipping_members', name: 'Slipping Members',
+    ruleText: 'Members (Choice, Reserved, Starter) whose 2026 attendance fell 40% or more and who kept transferring tickets.',
+    filters: { plan2026: ['choice', 'reserved', 'starter'], attendanceChangeMaxPct: -40, keptTransferring2026: true },
+    conversionRate: 0.18, valuePerConversion: 1450,
+    valueAssumption: 'Assumes 18% renew in the 2027 window after a save offer, worth about $1,450 each in ticket and F&B revenue that would otherwise lapse.',
+    whyNow: 'The 2027 membership renewal window is open and member benefit credits can anchor the save offer.',
+    heroId: 'H2',
+  },
+  {
+    id: 'group_only', name: 'Group-only buyers',
+    ruleText: 'Fans with two or more group outings who have never owned a ticket of their own.',
+    filters: { groupOutingsMin: 2, neverOwnTicket: true },
+    conversionRate: 0.07, valuePerConversion: 380,
+    valueAssumption: 'Assumes 7% buy a first Triple Play Bundle, worth about $380 each in ticket and F&B revenue.',
+    whyNow: 'Fan Fest in January is the first in-person moment to offer the Triple Play Bundle.',
+    heroId: 'H3',
+  },
+  {
+    id: 'lapsed_single_merch', name: 'Lapsed single-game buyers who still shop',
+    ruleText: 'Bought single games before 2026, hold no plan in 2026, and bought from the Team Store or team app in 2026.',
+    filters: { singleGameBefore2026: true, plan2026: ['none'], retailOrApp2026: true },
+    conversionRate: 0.06, valuePerConversion: 210,
+    valueAssumption: 'Assumes 6% return for a single game in 2027, worth about $210 each including F&B.',
+    whyNow: 'November offseason: Team Store and app engagement is the only live signal, so a win-back note lands before holiday gifting.',
+    heroId: null,
+  },
+  {
+    id: 'kids_families', name: 'Kids Club families without a plan',
+    ruleText: 'Households with a Kids Club child that bought only single games or a Triple Play Bundle in 2026. Parents only.',
+    filters: { kidsClubHousehold: true, plan2026: ['single', 'triple_play'] },
+    conversionRate: 0.08, valuePerConversion: 520,
+    valueAssumption: 'Assumes 8% of parents take a family plan for 2027, worth about $520 each in ticket and F&B revenue. Children are never contacted.',
+    whyNow: 'Fan Fest in January brings Kids Club families in person, and Ballpark Pass goes on sale in February.',
+    heroId: 'H4',
+  },
+  {
+    id: 'premium_curious', name: 'Premium-curious fans',
+    ruleText: 'Fans who have never owned premium seats but reached premium areas by transfer or group, and rank in the top quarter of F&B spend.',
+    filters: { excludePremiumOwn: true, premiumViaTransferOrGroup: true, fnbPercentile2026Min: 75 },
+    conversionRate: 0.04, valuePerConversion: 1180,
+    valueAssumption: 'Assumes 4% buy a Home Plate Club or Dugout Club seat for 2027, worth about $1,180 each in ticket and F&B revenue.',
+    whyNow: 'The 2027 membership renewal window is the moment to show a premium seat alongside the renewal.',
+    heroId: null,
+    sponsor: { label: 'Sponsor-ready audience (aggregate only, no fan data shared)' },
+  },
+];
+
+const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+const share = (xs, p) => (xs.length ? xs.filter(p).length / xs.length : 0);
+const ordinal = (n) => {
+  const t = n % 100;
+  const suffix = t >= 11 && t <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th');
+  return n + suffix;
+};
+const round1 = (v) => Math.round(v * 10) / 10;
+
+// Each evidence compares the segment with everyone in the relevant baseline; per-person values are not scaled.
+const EVIDENCE = {
+  pass_power(seg, all) {
+    const base = all.filter((f) => f.plans[2026] === 'ballpark_pass');
+    const s = avg(seg.map((f) => f.games[2026])), b = avg(base.map((f) => f.games[2026]));
+    return { label: 'Average 2026 games attended (vs all Ballpark Pass holders)', baselineLabel: 'All Ballpark Pass holders', unit: 'number', s, b, fmt: (v) => `${round1(v).toFixed(1)} games` };
+  },
+  slipping_members(seg, all) {
+    const base = all.filter((f) => ['choice', 'reserved', 'starter'].includes(f.plans[2026]) && f.attendanceChangePct !== null);
+    const s = avg(seg.map((f) => f.attendanceChangePct)), b = avg(base.map((f) => f.attendanceChangePct));
+    return { label: 'Average change in attendance, 2025 to 2026 (vs all Members)', baselineLabel: 'All Members', unit: 'pct', scale: 0.01, s, b, fmt: (v) => fmtPct(v / 100) };
+  },
+  group_only(seg, all) {
+    const s = avg(seg.map((f) => f.groupOutings)), b = avg(all.filter((f) => f.groupOutings > 0).map((f) => f.groupOutings));
+    return { label: 'Average group outings (vs all fans with a group outing)', baselineLabel: 'All fans with a group outing', unit: 'number', s, b, fmt: (v) => round1(v).toFixed(1) };
+  },
+  lapsed_single_merch(seg, all) {
+    const base = all.filter((f) => f.singleGameBefore2026);
+    const past = (f) => f.games[2024] + f.games[2025];
+    const s = avg(seg.map(past)), b = avg(base.map(past));
+    return { label: 'Average games attended in 2024 and 2025 (vs all 2024-25 single-game buyers)', baselineLabel: 'All 2024-25 single-game buyers', unit: 'number', s, b, fmt: (v) => `${round1(v).toFixed(1)} games` };
+  },
+  kids_families(seg, all) {
+    const tp = (f) => f.plans[2026] === 'triple_play';
+    const buyers = all.filter((f) => f.plans[2026] === 'single' || f.plans[2026] === 'triple_play');
+    const s = share(seg, tp), b = share(buyers, tp);
+    return { label: 'Share who bought a Triple Play Bundle in 2026 (vs all 2026 single-game and Triple Play buyers)', baselineLabel: 'All 2026 single-game and Triple Play buyers', unit: 'pct', s, b, fmt: (v) => fmtPct(v) };
+  },
+  premium_curious(seg, all) {
+    const spenders = all.filter((f) => f.fnbPercentile2026 !== null);
+    const s = avg(seg.map((f) => f.fnbPercentile2026)), b = avg(spenders.map((f) => f.fnbPercentile2026));
+    return { label: 'Average F&B spend percentile, 2026 (vs all F&B buyers)', baselineLabel: 'All F&B buyers', unit: 'number', s, b, fmt: (v) => ordinal(Math.round(v)) + ' percentile' };
+  },
+};
+
+function computeRecommendations(fans) {
+  const cards = RULES.map((r) => {
+    const seg = applyFilters(fans, r.filters);
+    const eligible = consentWaterfall(seg, 'email').eligible;
+    const e = EVIDENCE[r.id](seg, fans);
+    return {
+      id: r.id, name: r.name, ruleText: r.ruleText, filters: { ...r.filters },
+      matched: seg.length, eligible,
+      projectedValue: scaled(eligible) * r.conversionRate * r.valuePerConversion,
+      valueAssumption: r.valueAssumption,
+      evidence: {
+        label: e.label, baselineLabel: e.baselineLabel, segmentValue: e.fmt(e.s), baselineValue: e.fmt(e.b),
+        chart: { labels: ['This segment', e.baselineLabel], series: [[Math.round(e.s * (e.scale || 1) * 1e4) / 1e4, Math.round(e.b * (e.scale || 1) * 1e4) / 1e4]], unit: e.unit },
+      },
+      whyNow: r.whyNow, heroId: r.heroId,
+      sponsorAudience: r.sponsor ? r.sponsor.label : null,
+      sponsorAudienceSize: r.sponsor ? `${r.sponsor.label}: ${fmtCount(scaled(seg.length))} fans` : null,
+      expanded: false,
+    };
+  });
+  cards.sort((a, b) => b.projectedValue - a.projectedValue);
+  cards[0].expanded = true;
+  return cards;
+}
+
+module.exports = { RULES, RANKING_NOTE, computeRecommendations };
+
+},
+"rng.js": function (module, exports, require) {
+// Deterministic seeded PRNG helpers.
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Weighted pick. Falls back to the last positively weighted item on float drift.
+function pick(rand, items, weights) {
+  let total = 0;
+  for (const w of weights) total += w;
+  let x = rand() * total;
+  let last = items.length - 1;
+  for (let i = 0; i < items.length; i++) {
+    if (weights[i] > 0) last = i;
+    x -= weights[i];
+    if (x < 0 && weights[i] > 0) return items[i];
+  }
+  return items[last];
+}
+
+// Inclusive integer in [lo, hi].
+function intBetween(rand, lo, hi) {
+  return lo + Math.floor(rand() * (hi - lo + 1));
+}
+
+module.exports = { mulberry32, pick, intBetween };
+
+},
+"segments.js": function (module, exports, require) {
+// Tab 6: segment filters, consent waterfall, channel projections and builder state.
+const { CHANNELS, SCALE } = require('./config');
+const { roundParts, scaled, fmtCount, fmtMoney, fmtPct } = require('./format');
+
+const DEFAULT_FILTERS = {
+  plan2026: [], seasonsActiveMin: 0, games2026Min: null, games2026Max: null,
+  attendanceChangeMaxPct: null, fnbPercentile2026Min: null, keptTransferring2026: false,
+  retailOrApp2026: false, groupOutingsMin: 0, neverOwnTicket: false, singleGameBefore2026: false,
+  premiumViaTransferOrGroup: false, excludePremiumOwn: false, surveySatMax: null,
+  kidsClubHousehold: false, regions: [],
+};
+
+const has = (v) => v !== null && v !== undefined;
+
+function applyFilters(fans, filters) {
+  const f = { ...DEFAULT_FILTERS, ...filters };
+  return fans.filter((x) => {
+    if (f.plan2026.length && !f.plan2026.includes(x.plans[2026])) return false;
+    if (f.seasonsActiveMin > 0 && x.seasonsActive < f.seasonsActiveMin) return false;
+    if (has(f.games2026Min) && x.games[2026] < f.games2026Min) return false;
+    if (has(f.games2026Max) && x.games[2026] > f.games2026Max) return false;
+    if (has(f.attendanceChangeMaxPct) && !(x.attendanceChangePct !== null && x.attendanceChangePct <= f.attendanceChangeMaxPct)) return false;
+    if (has(f.fnbPercentile2026Min) && !(x.fnbPercentile2026 !== null && x.fnbPercentile2026 >= f.fnbPercentile2026Min)) return false;
+    if (f.keptTransferring2026 && !(x.transfersSent[2026] > 0)) return false;
+    if (f.retailOrApp2026 && !x.retailOrApp[2026]) return false;
+    if (f.groupOutingsMin > 0 && x.groupOutings < f.groupOutingsMin) return false;
+    if (f.neverOwnTicket && x.ownTicketEver) return false;
+    if (f.singleGameBefore2026 && !x.singleGameBefore2026) return false;
+    if (f.premiumViaTransferOrGroup && !(x.premium.viaTransfer + x.premium.viaGroup > 0)) return false;
+    if (f.excludePremiumOwn && x.premium.own !== 0) return false;
+    if (has(f.surveySatMax) && !(x.surveySat !== null && x.surveySat <= f.surveySatMax)) return false;
+    if (f.kidsClubHousehold && !(x.kidsClubChildren.length > 0)) return false;
+    if (f.regions.length && !f.regions.includes(x.region)) return false;
+    return true;
+  });
+}
+
+const STEP_LABELS = {
+  no_opt_in: 'No opt-in on record',
+  opted_out: 'Opted out',
+  dnc: 'Do-not-contact',
+  minor: 'Minors (Kids Club children are never included)',
+  duplicate: 'Duplicate contacts removed',
+};
+
+const channelById = (id) => {
+  const c = CHANNELS.find((x) => x.id === id);
+  if (!c) throw new Error(`Unknown channel ${id}`);
+  return c;
+};
+
+// Contacts that identify a fan on a channel; push has no shared contact, so it never dedupes.
+function channelContacts(fan, channelId) {
+  if (channelId === 'sms') return fan.phones;
+  if (channelId === 'push') return [];
+  return fan.emails;
+}
+
+function consentWaterfall(fans, channelId) {
+  const key = channelById(channelId).consentKey;
+  const removed = { no_opt_in: 0, opted_out: 0, dnc: 0, minor: 0, duplicate: 0 };
+  let remaining = [];
+  for (const f of fans) {
+    const c = f.consent[key];
+    if (c === 'opt_out') removed.opted_out++;
+    else if (c !== 'opt_in') removed.no_opt_in++;
+    else remaining.push(f);
+  }
+  // Steps run in brief order on what remains: opt-in checks, then do-not-contact, minors, duplicates.
+  const afterDnc = [];
+  for (const f of remaining) { if (f.dnc) removed.dnc++; else afterDnc.push(f); }
+  const afterMinor = [];
+  for (const f of afterDnc) { if (f.isMinor) removed.minor++; else afterMinor.push(f); }
+  const kept = new Set();
+  let eligible = 0;
+  for (const f of afterMinor.slice().sort((a, b) => (a.fanId < b.fanId ? -1 : a.fanId > b.fanId ? 1 : 0))) {
+    const cs = channelContacts(f, channelId);
+    if (cs.some((c) => kept.has(c))) { removed.duplicate++; continue; }
+    for (const c of cs) kept.add(c);
+    eligible++;
+  }
+  const steps = ['no_opt_in', 'opted_out', 'dnc', 'minor', 'duplicate']
+    .map((id) => ({ id, label: STEP_LABELS[id], removed: removed[id] }));
+  const display = roundParts([eligible, ...steps.map((s) => s.removed)].map((v) => v * SCALE));
+  return { start: fans.length, eligible, steps, display };
+}
+
+const FUNNEL = {
+  email: ['delivered', 'opened', 'clicked', 'purchased'],
+  sms: ['delivered', 'opened', 'clicked', 'purchased'],
+  push: ['delivered', 'opened', 'clicked', 'purchased'],
+  social: ['matched', 'clicked', 'purchased'],
+};
+
+function projectResults(eligible, channelIds) {
+  const perChannel = channelIds.map((id) => {
+    const ch = channelById(id);
+    const metrics = {};
+    for (const step of FUNNEL[id]) metrics[step] = Math.round(eligible * ch.rates[step]);
+    return { channelId: id, label: ch.label, metrics, revenue: metrics.purchased * ch.aov, rates: { ...ch.rates }, aov: ch.aov };
+  });
+  return {
+    perChannel,
+    combined: {
+      purchases: perChannel.reduce((a, c) => a + c.metrics.purchased, 0),
+      revenue: perChannel.reduce((a, c) => a + c.revenue, 0),
+    },
+  };
+}
+
+const STEP_ROW_LABELS = { delivered: 'Delivered', opened: 'Opened', clicked: 'Clicked', matched: 'Matched', purchased: 'Purchases' };
+
+// Display strings for projectResults output; tab 6 renders exactly these.
+function projectionDisplay(results) {
+  const perChannel = results.perChannel.map((c) => ({
+    channelId: c.channelId,
+    label: c.label,
+    rows: [
+      ...Object.keys(c.metrics).map((k) => ({ label: STEP_ROW_LABELS[k], value: fmtCount(scaled(c.metrics[k])) })),
+      { label: 'Projected revenue', value: fmtMoney(scaled(c.revenue)) },
+    ],
+  }));
+  const combined = [
+    { label: 'Combined purchases', value: fmtCount(scaled(results.combined.purchases)) },
+    { label: 'Combined revenue', value: fmtMoney(scaled(results.combined.revenue)) },
+  ];
+  return { perChannel, combined };
+}
+
+// Stated assumptions for a channel, as shown under its projections on tab 6.
+function assumptionText(ch) {
+  const pct = (r) => fmtPct(r, Math.abs(r * 100 - Math.round(r * 100)) > 1e-9 ? 1 : 0);
+  const rates = Object.keys(ch.rates).map((k) => `${STEP_ROW_LABELS[k]} ${pct(ch.rates[k])}`).join(', ');
+  return `Assumptions, share of eligible fans: ${rates}, average order ${fmtMoney(ch.aov)}.`;
+}
+
+// Combined purchases and revenue across single-channel projectResults outputs, as display rows.
+function combineProjections(results) {
+  const per = results.map((r) => r.perChannel[0]);
+  return projectionDisplay({
+    perChannel: per,
+    combined: {
+      purchases: per.reduce((a, c) => a + c.metrics.purchased, 0),
+      revenue: per.reduce((a, c) => a + c.revenue, 0),
+    },
+  }).combined;
+}
+
+function createSegmentState() {
+  return { filters: { ...DEFAULT_FILTERS, plan2026: [], regions: [] }, channelIds: ['email'], fromRecommendation: null };
+}
+
+function applyRecommendation(state, rec) {
+  return {
+    ...state,
+    filters: { ...DEFAULT_FILTERS, plan2026: [], regions: [], ...rec.filters },
+    channelIds: ['email'],
+    fromRecommendation: { id: rec.id, name: rec.name },
+  };
+}
+
+function setFilter(state, key, value) {
+  return { ...state, filters: { ...state.filters, [key]: value }, fromRecommendation: null };
+}
+
+module.exports = {
+  DEFAULT_FILTERS, applyFilters, consentWaterfall, projectResults, projectionDisplay,
+  createSegmentState, applyRecommendation, setFilter, STEP_ROW_LABELS,
+  assumptionText, combineProjections,
+};
+
+},
+"ui/charts.js": function (module, exports, require) {
+// Chart.js wrappers. Every tick, tooltip and data label goes through fmtChartValue.
+const { PALETTE } = require('../config');
+const { fmtChartValue } = require('../format');
+
+const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+const LABEL_PX = 12;
+// Non-highlighted series cycle: primary and one neutral, then tints of the same two.
+const CYCLE = [PALETTE.primary, PALETTE.grey, '#4A86C5', PALETTE.greyLight, '#8FB3D9', PALETTE.slate, '#C3D6EA'];
+const EMPTY_TEXT = 'No fans match these filters';
+
+const live = new Map();
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function destroyChart(container) {
+  const c = live.get(container);
+  if (c) { c.destroy(); live.delete(container); }
+}
+
+function destroyAllCharts() {
+  for (const c of live.values()) c.destroy();
+  live.clear();
+}
+
+function isAllZero(spec) {
+  return spec.series.every((s) => s.data.every((v) => v === null || v === undefined || v === 0));
+}
+
+function seriesColors(spec) {
+  let n = 0;
+  return spec.series.map((s) => (s.highlight ? PALETTE.accent : CYCLE[n++ % CYCLE.length]));
+}
+
+function isDonut(spec) { return spec.type === 'doughnut' || spec.type === 'donut'; }
+function isHorizontal(spec) { return spec.type === 'hbar' || spec.indexAxis === 'y'; }
+
+function buildDatasets(spec) {
+  const colors = seriesColors(spec);
+  const hi = spec.highlightIndex;
+  if (isDonut(spec)) {
+    const s = spec.series[0];
+    const bg = s.data.map((_, i) => (i === hi ? PALETTE.accent : i === 0 && hi === undefined ? PALETTE.primary : PALETTE.grey));
+    return [{ label: s.name, data: s.data, backgroundColor: bg, borderColor: PALETTE.white, borderWidth: 2 }];
+  }
+  return spec.series.map((s, si) => {
+    const base = { label: s.name, data: s.data };
+    if (spec.type === 'line') {
+      return { ...base, borderColor: colors[si], backgroundColor: colors[si], borderWidth: s.highlight ? 2.5 : 1.5,
+        pointRadius: 0, pointHoverRadius: 4, tension: 0.2, spanGaps: false, yAxisID: s.axis || 'y' };
+    }
+    const bg = spec.series.length === 1 && hi !== undefined
+      ? s.data.map((_, i) => (i === hi ? PALETTE.accent : PALETTE.primary))
+      : colors[si];
+    return { ...base, backgroundColor: bg, borderColor: PALETTE.white, borderWidth: spec.stacked ? 1 : 0, maxBarThickness: 56 };
+  });
+}
+
+function axisTitleFont() { return { family: FONT, size: LABEL_PX }; }
+
+function buildScales(spec) {
+  if (isDonut(spec)) return {};
+  const horizontal = isHorizontal(spec);
+  const unit = spec.unit;
+  const valueAxis = (extra) => ({
+    beginAtZero: true,
+    stacked: !!spec.stacked,
+    grid: { color: PALETTE.greyLight },
+    border: { display: false },
+    ticks: { font: axisTitleFont(), color: PALETTE.slate, maxTicksLimit: 5, callback: (v) => fmtChartValue(v, unit) },
+    ...extra,
+  });
+  const categoryAxis = {
+    stacked: !!spec.stacked,
+    grid: { display: false },
+    ticks: { font: axisTitleFont(), color: PALETTE.slate, autoSkip: true, maxTicksLimit: spec.type === 'line' ? 9 : 12, maxRotation: 0 },
+  };
+  const scales = horizontal ? { x: valueAxis({ position: 'bottom' }), y: categoryAxis } : { x: categoryAxis, y: valueAxis({ position: 'left' }) };
+  if (spec.series.some((s) => s.axis === 'y2')) {
+    scales.y2 = valueAxis({ position: 'right', grid: { drawOnChartArea: false } });
+  }
+  return scales;
+}
+
+// Draws value labels on small bar charts and donut slices, formatted by fmtChartValue.
+function valueLabelPlugin(spec) {
+  return {
+    id: 'valueLabels',
+    afterDatasetsDraw(chart) {
+      const donut = isDonut(spec);
+      const points = spec.series.length * spec.labels.length;
+      if (spec.type === 'line' || spec.stacked || (!donut && points > 12)) return;
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.font = `600 ${LABEL_PX}px ${FONT}`;
+      const horizontal = isHorizontal(spec);
+      chart.data.datasets.forEach((ds, di) => {
+        chart.getDatasetMeta(di).data.forEach((arc, i) => {
+          const v = ds.data[i];
+          if (v === null || v === undefined || v === 0) return;
+          const text = fmtChartValue(v, spec.unit);
+          if (donut) {
+            ctx.fillStyle = PALETTE.white;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const p = arc.tooltipPosition();
+            ctx.fillText(text, p.x, p.y);
+          } else if (horizontal) {
+            ctx.fillStyle = PALETTE.ink;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, arc.x + 4, arc.y);
+          } else {
+            ctx.fillStyle = PALETTE.ink;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(text, arc.x, arc.y - 2);
+          }
+        });
+      });
+      ctx.restore();
+    },
+  };
+}
+
+function renderChart(container, spec) {
+  destroyChart(container);
+  container.textContent = '';
+  if (isAllZero(spec)) {
+    container.appendChild(el('div', 'chart-empty', EMPTY_TEXT));
+    return null;
+  }
+  if (typeof Chart === 'undefined') {
+    container.appendChild(el('div', 'chart-empty', 'Chart library unavailable'));
+    return null;
+  }
+  const canvas = el('canvas');
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', spec.title);
+  container.appendChild(canvas);
+  const donut = isDonut(spec);
+  const horizontal = isHorizontal(spec);
+  const showLegend = donut || spec.series.length > 1;
+  const chart = new Chart(canvas, {
+    type: donut ? 'doughnut' : spec.type === 'hbar' ? 'bar' : spec.type,
+    data: { labels: spec.labels, datasets: buildDatasets(spec) },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      indexAxis: horizontal ? 'y' : 'x',
+      layout: { padding: { top: 14, right: horizontal ? 36 : 4 } },
+      interaction: spec.type === 'line' ? { mode: 'index', intersect: false } : undefined,
+      scales: buildScales(spec),
+      plugins: {
+        legend: {
+          display: showLegend,
+          position: donut ? 'right' : 'bottom',
+          labels: { font: { family: FONT, size: LABEL_PX }, color: PALETTE.ink, boxWidth: 12, boxHeight: 12 },
+        },
+        tooltip: {
+          titleFont: { family: FONT, size: LABEL_PX },
+          bodyFont: { family: FONT, size: LABEL_PX },
+          callbacks: {
+            label: (c) => `${donut ? c.label : c.dataset.label}: ${fmtChartValue(c.raw, spec.unit)}`,
+          },
+        },
+      },
+    },
+    plugins: [valueLabelPlugin(spec)],
+  });
+  live.set(container, chart);
+  return chart;
+}
+
+function renderKpis(container, kpis) {
+  container.textContent = '';
+  for (const k of kpis) {
+    const card = el('div', 'kpi');
+    card.appendChild(el('div', 'kpi-value', k.value));
+    card.appendChild(el('div', 'kpi-label', k.label));
+    container.appendChild(card);
+  }
+}
+
+module.exports = { renderChart, renderKpis, destroyAllCharts, EMPTY_TEXT };
+
+},
+"ui/main.js": function (module, exports, require) {
+// App shell: header state, tab bar, routing and shared state.
+// Tab renderers live in TABS (see registerTab); an unregistered tab shows a placeholder.
+const { buildModel } = require('../model');
+const { createSegmentState } = require('../segments');
+const { destroyAllCharts } = require('./charts');
+const { renderSystemTab } = require('./tab-systems');
+const { renderFan360 } = require('./tab-fan360');
+const { renderProfile } = require('./tab-profile');
+const { renderSegments } = require('./tab-segments');
+const { renderRecs } = require('./tab-recs');
+
+const TAB_GROUPS = [
+  { label: 'Your systems today', tabs: [
+    { id: 'ticketing', label: '1 Ticketing & Entry' },
+    { id: 'fnb', label: '2 F&B & Retail' },
+    { id: 'groups', label: '3 Groups & Experiences' },
+  ] },
+  { label: 'Linked', tabs: [
+    { id: 'fan360', label: '4 Fan 360' },
+    { id: 'profile', label: '5 Individual View' },
+    { id: 'segments', label: '6 Segment Builder' },
+    { id: 'recs', label: '7 Segment Recommendations' },
+  ] },
+];
+const TAB_IDS = TAB_GROUPS.flatMap((g) => g.tabs.map((t) => t.id));
+
+const state = { tab: 'ticketing', role: 'sales', selectedFanId: null, segment: createSegmentState() };
+let model = null;
+
+// Renderer signature: (container, { model, state, goTo, setState, payload }).
+const TABS = {
+  ticketing: (c, ctx) => renderSystemTab(c, ctx.model.views.ticketing),
+  fnb: (c, ctx) => renderSystemTab(c, ctx.model.views.fnb),
+  groups: (c, ctx) => renderSystemTab(c, ctx.model.views.groups),
+  fan360: (c, ctx) => renderFan360(c, ctx.model.views.fan360),
+  profile: (c, ctx) => renderProfile(c, ctx),
+  segments: (c, ctx) => renderSegments(c, ctx),
+  recs: (c, ctx) => renderRecs(c, ctx),
+};
+
+function registerTab(id, renderer) { TABS[id] = renderer; }
+
+function tabLabel(id) {
+  for (const g of TAB_GROUPS) for (const t of g.tabs) if (t.id === id) return t.label;
+  return id;
+}
+
+function renderPlaceholder(container, id) {
+  container.textContent = '';
+  const p = document.createElement('p');
+  p.className = 'placeholder';
+  p.textContent = `${tabLabel(id)} is coming together in the next build step.`;
+  container.appendChild(p);
+}
+
+function renderTabBar() {
+  const bar = document.getElementById('tabbar');
+  bar.textContent = '';
+  TAB_GROUPS.forEach((group, gi) => {
+    if (gi > 0) { const sep = document.createElement('div'); sep.className = 'tab-sep'; bar.appendChild(sep); }
+    const wrap = document.createElement('div');
+    wrap.className = 'tab-group';
+    wrap.setAttribute('role', 'tablist');
+    wrap.setAttribute('aria-label', group.label);
+    const lab = document.createElement('div');
+    lab.className = 'tab-group-label';
+    lab.textContent = group.label;
+    wrap.appendChild(lab);
+    const row = document.createElement('div');
+    row.className = 'tab-group-tabs';
+    for (const t of group.tabs) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tab';
+      b.id = `tab-${t.id}`;
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', String(t.id === state.tab));
+      b.textContent = t.label;
+      b.addEventListener('click', () => onTabClick(t.id));
+      row.appendChild(b);
+    }
+    wrap.appendChild(row);
+    bar.appendChild(wrap);
+  });
+}
+
+function render(payload) {
+  const container = document.getElementById('app');
+  destroyAllCharts();
+  renderTabBar();
+  if (!model) return;
+  const renderer = TABS[state.tab];
+  if (renderer) renderer(container, { model, state, goTo, setState, payload });
+  else renderPlaceholder(container, state.tab);
+}
+
+function goTo(tabId, payload) {
+  if (!TAB_IDS.includes(tabId)) throw new Error(`Unknown tab ${tabId}`);
+  state.tab = tabId;
+  render(payload);
+}
+
+function setState(patch) {
+  Object.assign(state, patch);
+  render();
+}
+
+function onTabClick(id) { goTo(id); }
+
+function mount(m) {
+  model = m;
+  render();
+}
+
+const api = { state, TABS, TAB_IDS, registerTab, goTo, setState, mount };
+if (typeof globalThis !== 'undefined') globalThis.__fan360 = api;
+
+// Paint the loading state first, then build the model on the next tick.
+if (typeof document !== 'undefined') {
+  renderTabBar();
+  setTimeout(() => mount(buildModel()), 0);
+}
+
+module.exports = api;
+
+},
+"ui/tab-fan360.js": function (module, exports, require) {
+// Tab 4: what linking the three systems shows. All figures arrive pre-formatted from the view model.
+const { renderChart, renderKpis } = require('./charts');
+
+function node(tag, className, text) {
+  const n = document.createElement(tag);
+  if (className) n.className = className;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+// Stacked bar whose labels come from roundParts, so the parts visibly add up to the total.
+function renderParts(card, spec, totalCaption) {
+  const sum = spec.parts.reduce((a, b) => a + b, 0) || 1;
+  const bar = node('div', 'parts-bar');
+  spec.parts.forEach((p, i) => {
+    const seg = node('div', `parts-seg parts-seg-${i}`);
+    seg.style.flexGrow = String(Math.max(p, sum * 0.02));
+    seg.setAttribute('title', `${spec.names[i]}: ${spec.labels[i]}`);
+    bar.appendChild(seg);
+  });
+  card.appendChild(bar);
+  const list = node('ul', 'parts-list');
+  spec.names.forEach((name, i) => {
+    const li = node('li', 'parts-item');
+    li.appendChild(node('span', `parts-swatch parts-seg-${i}`));
+    li.appendChild(node('span', 'parts-name', name));
+    li.appendChild(node('span', 'parts-value', spec.labels[i]));
+    list.appendChild(li);
+  });
+  const total = node('li', 'parts-item parts-total');
+  total.appendChild(node('span', 'parts-swatch parts-swatch-none'));
+  total.appendChild(node('span', 'parts-name', totalCaption));
+  total.appendChild(node('span', 'parts-value', spec.totalLabel));
+  list.appendChild(total);
+  card.appendChild(list);
+}
+
+function renderFan360(container, view) {
+  container.textContent = '';
+  container.appendChild(node('p', 'sys-intro', 'Link the records from all three systems and the same fans show up once, with their full value.'));
+  const kpis = node('div', 'kpis kpis-hero');
+  container.appendChild(kpis);
+  renderKpis(kpis, view.kpis);
+  // Mark the large tile after the shared renderer has built the cards.
+  view.kpis.forEach((k, i) => {
+    if (k.size === 'large' && kpis.children[i]) kpis.children[i].className += ' kpi-large';
+    if (k.note && kpis.children[i]) kpis.children[i].appendChild(node('div', 'kpi-note', k.note));
+  });
+
+  const grid = node('div', 'charts');
+  container.appendChild(grid);
+  const card = (title, takeaway) => {
+    const c = node('section', 'chart-card');
+    c.appendChild(node('h3', 'chart-title', title));
+    grid.appendChild(c);
+    return { c, takeaway: () => c.appendChild(node('p', 'takeaway', takeaway)) };
+  };
+
+  const f = card('Linkage funnel: source records to resolved fans', view.takeaways.funnel);
+  renderParts(f.c, view.funnel, 'Source records');
+  f.takeaway();
+
+  const m = card('How each link was made', view.takeaways.matchBreakdown);
+  renderParts(m.c, view.matchBreakdown, 'Candidate links');
+  m.takeaway();
+
+  for (const [spec, key] of [[view.overlap, 'overlap'], [view.valueBySystems, 'valueBySystems']]) {
+    const c = card(spec.title, view.takeaways[key]);
+    const box = node('div', 'chart-box');
+    c.c.appendChild(box);
+    renderChart(box, spec);
+    c.takeaway();
+  }
+}
+
+module.exports = { renderFan360 };
+
+},
+"ui/tab-profile.js": function (module, exports, require) {
+// Tab 5: hero picker, search, role toggle and the role-masked unified profile.
+// Per-person values are shown as the view model formats them (not scaled).
+const { searchFans, fanProfileView, ROLES } = require('../views-profile');
+const { SEASONS } = require('../config');
+
+const SOURCE_NAMES = {
+  ticketing: 'Ticketing & Entry', fnb: 'F&B & Retail', groups: 'Groups & Experiences',
+  experiences: 'Groups & Experiences', surveys: 'Survey', kidsClub: 'Kids Club',
+};
+
+function node(tag, className, text) {
+  const n = document.createElement(tag);
+  if (className) n.className = className;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+function valueNode(f) {
+  return f.restricted ? node('span', 'pill-restricted', f.value) : node('span', 'pf-value', f.value);
+}
+
+function renderSwimlanes(lanes) {
+  const wrap = node('div', 'lanes');
+  const head = node('div', 'lane lane-head');
+  head.appendChild(node('div', 'lane-name'));
+  const cols = node('div', 'lane-cols');
+  for (const yr of SEASONS) cols.appendChild(node('div', 'lane-season', String(yr)));
+  head.appendChild(cols);
+  wrap.appendChild(head);
+  for (const lane of lanes) {
+    const row = node('div', 'lane');
+    row.appendChild(node('div', 'lane-name', lane.system));
+    const body = node('div', 'lane-cols');
+    for (const yr of SEASONS) {
+      const cell = node('div', 'lane-cell');
+      for (const ev of lane.events.filter((e) => e.season === yr)) {
+        cell.appendChild(node('div', `lane-event lane-${ev.kind}`, ev.label));
+      }
+      body.appendChild(cell);
+    }
+    row.appendChild(body);
+    wrap.appendChild(row);
+  }
+  return wrap;
+}
+
+function renderProfileBody(el, view) {
+  el.textContent = '';
+  const h = view.header;
+  const top = node('div', 'pf-header');
+  top.appendChild(node('h2', 'pf-name', h.name));
+  top.appendChild(node('span', 'pf-meta', `${h.region}, ${h.systems} ${h.systems === 1 ? 'system' : 'systems'}, match confidence ${h.confidence}`));
+  top.appendChild(node('span', 'pf-meta pf-role', `Viewing as ${h.roleLabel}`));
+  el.appendChild(top);
+
+  const cols = node('div', 'pf-cols');
+  const left = node('div', 'pf-col');
+  const groups = [];
+  for (const f of view.fields) {
+    let g = groups.find((x) => x.name === f.group);
+    if (!g) { g = { name: f.group, rows: [] }; groups.push(g); }
+    g.rows.push(f);
+  }
+  for (const g of groups) {
+    const sec = node('section', 'pf-group');
+    sec.appendChild(node('h3', 'pf-group-title', g.name));
+    for (const f of g.rows) {
+      const row = node('div', 'pf-row');
+      row.appendChild(node('span', 'pf-label', f.label));
+      row.appendChild(valueNode(f));
+      sec.appendChild(row);
+    }
+    if (g.name === 'Linkage') {
+      for (const s of view.sources) {
+        const row = node('div', 'pf-row');
+        row.appendChild(node('span', 'pf-label', `Linked record (${SOURCE_NAMES[s.source] || s.source})`));
+        row.appendChild(node('span', 'pf-value', `${s.id}, ${s.confidence} confidence`));
+        sec.appendChild(row);
+      }
+    }
+    left.appendChild(sec);
+  }
+  cols.appendChild(left);
+
+  const right = node('div', 'pf-col');
+  const tl = node('section', 'pf-group');
+  tl.appendChild(node('h3', 'pf-group-title', 'Three seasons across systems'));
+  tl.appendChild(renderSwimlanes(view.swimlanes));
+  right.appendChild(tl);
+  if (view.household.length) {
+    const hh = node('section', 'pf-group');
+    hh.appendChild(node('h3', 'pf-group-title', 'Household'));
+    for (const r of view.household) {
+      const row = node('div', 'pf-row');
+      row.appendChild(node('span', 'pf-label', r.label));
+      row.appendChild(valueNode(r));
+      hh.appendChild(row);
+    }
+    right.appendChild(hh);
+  }
+  cols.appendChild(right);
+  el.appendChild(cols);
+}
+
+function renderProfile(container, ctx) {
+  const { model, state, payload } = ctx;
+  if (payload && payload.fanId !== undefined && payload.fanId !== null) state.selectedFanId = payload.fanId;
+  const heroes = searchFans(model.fans, '');
+  if (state.selectedFanId === null || state.selectedFanId === undefined || !model.fanById.has(state.selectedFanId)) {
+    state.selectedFanId = heroes[0].fanId;
+  }
+
+  container.textContent = '';
+  container.appendChild(node('p', 'sys-intro', 'One linked fan across three seasons and three systems. Switch roles to see what each team is allowed to see.'));
+  const bar = node('div', 'pf-bar');
+  const chips = node('div', 'chips');
+  const search = node('input', 'pf-search');
+  search.type = 'search';
+  search.placeholder = 'Search fans by name or email';
+  search.setAttribute('aria-label', 'Search fans by name or email');
+  const toggle = node('div', 'role-toggle');
+  toggle.setAttribute('role', 'group');
+  toggle.setAttribute('aria-label', 'Role');
+  const results = node('div', 'pf-results');
+  const body = node('div', 'pf-body');
+
+  function paintChips() {
+    chips.textContent = '';
+    for (const h of heroes) {
+      const b = node('button', 'chip-btn', h.name);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(h.fanId === state.selectedFanId));
+      b.addEventListener('click', () => onPick(h.fanId));
+      chips.appendChild(b);
+    }
+  }
+  function paintToggle() {
+    toggle.textContent = '';
+    for (const id of ['sales', 'privacy']) {
+      const b = node('button', 'role-btn', ROLES[id]);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(state.role === id));
+      b.addEventListener('click', () => onRole(id));
+      toggle.appendChild(b);
+    }
+  }
+  function paintResults() {
+    results.textContent = '';
+    if (!search.value.trim()) return;
+    const found = searchFans(model.fans, search.value);
+    if (!found.length) { results.appendChild(node('div', 'pf-none', 'No fans match that search')); return; }
+    for (const f of found) {
+      const b = node('button', 'result-btn', f.name);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(f.fanId === state.selectedFanId));
+      b.addEventListener('click', () => onPick(f.fanId));
+      results.appendChild(b);
+    }
+  }
+  function paintBody() {
+    renderProfileBody(body, fanProfileView(model.fanById.get(state.selectedFanId), state.role, model.world));
+  }
+  function paintAll() { paintChips(); paintToggle(); paintResults(); paintBody(); }
+  // Only the profile, chips and results repaint, so the search box keeps focus and text.
+  function onPick(fanId) { state.selectedFanId = fanId; paintAll(); }
+  function onRole(role) { state.role = role; paintAll(); }
+
+  search.addEventListener('input', paintResults);
+  bar.appendChild(node('span', 'pf-bar-label', 'Hero fans'));
+  bar.appendChild(chips);
+  bar.appendChild(search);
+  bar.appendChild(toggle);
+  container.appendChild(bar);
+  container.appendChild(results);
+  container.appendChild(body);
+  paintAll();
+}
+
+module.exports = { renderProfile };
+
+},
+"ui/tab-recs.js": function (module, exports, require) {
+// Tab 7: ranked pattern-detection cards. Each card opens its rule in the Segment Builder.
+const { COPY } = require('../config');
+const { scaled, fmtCount, fmtMoney } = require('../format');
+const { RANKING_NOTE } = require('../recommendations');
+const { applyRecommendation } = require('../segments');
+
+function node(tag, className, text) {
+  const n = document.createElement(tag);
+  if (className) n.className = className;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+// Two bars, segment against baseline. Text comes from the card's own evidence strings.
+function renderEvidence(parent, ev) {
+  const [s, b] = ev.chart.series[0].map((v) => Math.abs(v));
+  const max = Math.max(s, b) || 1;
+  const rows = [
+    { name: ev.chart.labels[0], value: ev.segmentValue, mag: s, cls: 'ev-seg' },
+    { name: ev.chart.labels[1], value: ev.baselineValue, mag: b, cls: 'ev-base' },
+  ];
+  const chart = node('div', 'ev-chart');
+  chart.setAttribute('role', 'img');
+  chart.setAttribute('aria-label', `${ev.label}: ${ev.segmentValue} against ${ev.baselineValue}`);
+  for (const r of rows) {
+    const row = node('div', 'ev-row');
+    row.appendChild(node('span', 'ev-name', r.name));
+    const track = node('div', 'ev-track');
+    const bar = node('div', `ev-bar ${r.cls}`);
+    bar.style.width = `${Math.max(2, Math.round((r.mag / max) * 100))}%`;
+    bar.setAttribute('title', `${r.name}: ${r.value}`);
+    track.appendChild(bar);
+    row.appendChild(track);
+    row.appendChild(node('span', 'ev-value', r.value));
+    chart.appendChild(row);
+  }
+  parent.appendChild(node('div', 'ev-title', ev.label));
+  parent.appendChild(chart);
+}
+
+function renderRecs(container, ctx) {
+  const { model, state, goTo } = ctx;
+  if (!state.recsOpen) {
+    state.recsOpen = {};
+    for (const c of model.recommendations) state.recsOpen[c.id] = !!c.expanded;
+  }
+
+  container.textContent = '';
+  container.appendChild(node('h2', 'recs-title', COPY.recsLabel));
+  container.appendChild(node('p', 'recs-note', COPY.recsProdNote));
+  container.appendChild(node('p', 'recs-note recs-rank', RANKING_NOTE));
+  const list = node('div', 'recs-list');
+  container.appendChild(list);
+
+  function onOpenBuilder(card) {
+    state.segment = applyRecommendation(state.segment, card);
+    goTo('segments');
+  }
+  function onExampleFan(fan) { goTo('profile', { fanId: fan.fanId }); }
+  function onToggle(card) { state.recsOpen[card.id] = !state.recsOpen[card.id]; paint(); }
+
+  function paint() {
+    list.textContent = '';
+    model.recommendations.forEach((card, i) => {
+      const open = !!state.recsOpen[card.id];
+      const el = node('article', `rec-card${open ? ' rec-open' : ''}`);
+      const head = node('div', 'rec-head');
+      head.appendChild(node('span', 'rec-rank', String(i + 1)));
+      head.appendChild(node('h3', 'rec-name', card.name));
+      const toggle = node('button', 'btn btn-quiet rec-toggle', open ? 'Hide details' : 'Show details');
+      toggle.type = 'button';
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.addEventListener('click', () => onToggle(card));
+      head.appendChild(toggle);
+      el.appendChild(head);
+
+      const stats = node('div', 'rec-stats');
+      const stat = (label, value, cls) => {
+        const s = node('div', 'rec-stat');
+        s.appendChild(node('div', `rec-stat-value ${cls}`, value));
+        s.appendChild(node('div', 'rec-stat-label', label));
+        stats.appendChild(s);
+      };
+      stat('fans in the segment', fmtCount(scaled(card.matched)), 'rec-size');
+      stat('eligible after consent (email)', fmtCount(scaled(card.eligible)), 'rec-eligible');
+      stat('projected value', fmtMoney(card.projectedValue), 'rec-value');
+      el.appendChild(stats);
+
+      if (open) {
+        const body = node('div', 'rec-body');
+        body.appendChild(node('p', 'rec-rule', card.ruleText));
+        body.appendChild(node('p', 'rec-assume', card.valueAssumption));
+        const ev = node('div', 'rec-evidence');
+        renderEvidence(ev, card.evidence);
+        body.appendChild(ev);
+        const why = node('p', 'rec-why');
+        why.appendChild(node('strong', 'rec-why-label', 'Why now: '));
+        why.appendChild(node('span', 'rec-why-text', card.whyNow));
+        body.appendChild(why);
+        if (card.sponsorAudience) body.appendChild(node('p', 'rec-sponsor', card.sponsorAudienceSize));
+        el.appendChild(body);
+      }
+
+      const actions = node('div', 'rec-actions');
+      const go = node('button', 'btn rec-open-btn', 'Open in Segment Builder');
+      go.type = 'button';
+      go.setAttribute('data-rec', card.id);
+      go.addEventListener('click', () => onOpenBuilder(card));
+      actions.appendChild(go);
+      const hero = card.heroId ? model.fans.find((f) => f.heroId === card.heroId) : null;
+      if (hero) {
+        const ex = node('button', 'btn btn-quiet rec-example', 'Example fan');
+        ex.type = 'button';
+        ex.addEventListener('click', () => onExampleFan(hero));
+        actions.appendChild(ex);
+      }
+      el.appendChild(actions);
+      list.appendChild(el);
+    });
+  }
+  paint();
+}
+
+module.exports = { renderRecs };
+
+},
+"ui/tab-segments.js": function (module, exports, require) {
+// Tab 6: Segment Builder. Filters on the left; live count, consent waterfall and projections on the right.
+// Every figure is rendered from the shared formatters and the segments.js display strings, never re-scaled here.
+const { CHANNELS, PLANS, REGIONS } = require('../config');
+const { scaled, fmtCount } = require('../format');
+const {
+  DEFAULT_FILTERS, applyFilters, consentWaterfall, projectResults, projectionDisplay,
+  createSegmentState, setFilter, assumptionText, combineProjections,
+} = require('../segments');
+const { EMPTY_TEXT } = require('./charts');
+
+const PLAN_IDS_2026 = ['choice', 'reserved', 'starter', 'ballpark_pass', 'triple_play', 'single', 'none'];
+const DUPLICATE_LABEL = 'Duplicate contacts (already merged by linkage)';
+
+function node(tag, className, text) {
+  const n = document.createElement(tag);
+  if (className) n.className = className;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+// Control specs grouped by rail section. Every DEFAULT_FILTERS key appears exactly once.
+const SECTIONS = [
+  { title: 'Ticketing', controls: [
+    { key: 'plan2026', kind: 'multi', label: '2026 plan', options: PLAN_IDS_2026.map((id) => ({ value: id, label: PLANS[id] })) },
+    { key: 'seasonsActiveMin', kind: 'number', label: 'Seasons active, at least (of 3)', blank: 0, min: 0, max: 3 },
+    { key: 'games2026Min', kind: 'number', label: '2026 games attended, at least', min: 0 },
+    { key: 'games2026Max', kind: 'number', label: '2026 games attended, at most', min: 0 },
+    { key: 'attendanceChangeMaxPct', kind: 'number', label: 'Attendance change 2025 to 2026, at or below (%)' },
+    { key: 'keptTransferring2026', kind: 'check', label: 'Kept transferring tickets in 2026' },
+    { key: 'neverOwnTicket', kind: 'check', label: 'Never owned a ticket of their own' },
+    { key: 'singleGameBefore2026', kind: 'check', label: 'Bought single games before 2026' },
+    { key: 'premiumViaTransferOrGroup', kind: 'check', label: 'Reached premium areas by transfer or group' },
+    { key: 'excludePremiumOwn', kind: 'check', label: 'Never owned premium seats' },
+  ] },
+  { title: 'F&B', controls: [
+    { key: 'fnbPercentile2026Min', kind: 'number', label: '2026 F&B spend percentile, at least', min: 0, max: 100 },
+    { key: 'retailOrApp2026', kind: 'check', label: 'Bought from Team Store or team app in 2026' },
+  ] },
+  { title: 'Groups', controls: [
+    { key: 'groupOutingsMin', kind: 'number', label: 'Group outings, at least', blank: 0, min: 0 },
+  ] },
+  { title: 'Engagement', controls: [
+    { key: 'surveySatMax', kind: 'number', label: 'Latest survey satisfaction, at or below' },
+  ] },
+  { title: 'Household', controls: [
+    { key: 'kidsClubHousehold', kind: 'check', label: 'Household has a Kids Club child (parents only)' },
+    { key: 'regions', kind: 'multi', label: 'Region', options: REGIONS.map((r) => ({ value: r, label: r })) },
+  ] },
+];
+
+const CONTROL_BY_KEY = {};
+for (const s of SECTIONS) for (const c of s.controls) CONTROL_BY_KEY[c.key] = c;
+
+const planName = (id) => PLANS[id] || id;
+
+// Short text for each active filter, used for the chips shown after opening from a recommendation.
+function describeFilters(f) {
+  const out = [];
+  if (f.plan2026.length) out.push(`2026 plan: ${f.plan2026.map(planName).join(', ')}`);
+  if (f.seasonsActiveMin > 0) out.push(`Seasons active at least ${f.seasonsActiveMin}`);
+  if (f.games2026Min !== null && f.games2026Min !== undefined) out.push(`2026 games at least ${f.games2026Min}`);
+  if (f.games2026Max !== null && f.games2026Max !== undefined) out.push(`2026 games at most ${f.games2026Max}`);
+  if (f.attendanceChangeMaxPct !== null && f.attendanceChangeMaxPct !== undefined) out.push(`Attendance change at or below ${f.attendanceChangeMaxPct}%`);
+  if (f.fnbPercentile2026Min !== null && f.fnbPercentile2026Min !== undefined) out.push(`F&B percentile at least ${f.fnbPercentile2026Min}`);
+  if (f.keptTransferring2026) out.push('Kept transferring in 2026');
+  if (f.retailOrApp2026) out.push('Team Store or app buyer in 2026');
+  if (f.groupOutingsMin > 0) out.push(`Group outings at least ${f.groupOutingsMin}`);
+  if (f.neverOwnTicket) out.push('Never owned a ticket');
+  if (f.singleGameBefore2026) out.push('Single-game buyer before 2026');
+  if (f.premiumViaTransferOrGroup) out.push('Premium via transfer or group');
+  if (f.excludePremiumOwn) out.push('Never owned premium seats');
+  if (f.surveySatMax !== null && f.surveySatMax !== undefined) out.push(`Survey satisfaction at or below ${f.surveySatMax}`);
+  if (f.kidsClubHousehold) out.push('Kids Club household (parents only)');
+  if (f.regions.length) out.push(`Region: ${f.regions.join(', ')}`);
+  return out;
+}
+
+// Runs one channel through consent and projection; strings come straight from segments.js.
+function channelResult(matchedFans, channelId) {
+  const w = consentWaterfall(matchedFans, channelId);
+  const proj = projectResults(w.eligible, [channelId]);
+  return { id: channelId, w, proj, disp: projectionDisplay(proj) };
+}
+
+function renderWaterfall(parent, r, empty) {
+  const { w } = r;
+  const sum = w.display.parts.reduce((a, b) => a + b, 0) || 1;
+  const names = ['Eligible after consent', ...w.steps.map((s) => (s.id === 'duplicate' ? DUPLICATE_LABEL : s.label))];
+  const box = node('div', 'wf-box');
+  if (empty) {
+    box.appendChild(node('div', 'chart-empty', EMPTY_TEXT));
+  } else {
+    const bar = node('div', 'parts-bar');
+    w.display.parts.forEach((p, i) => {
+      const seg = node('div', `parts-seg ${i === 0 ? 'wf-eligible' : 'wf-removed'}`);
+      seg.style.flexGrow = String(Math.max(p, sum * 0.01));
+      seg.setAttribute('title', `${names[i]}: ${w.display.labels[i]}`);
+      bar.appendChild(seg);
+    });
+    box.appendChild(bar);
+  }
+  parent.appendChild(box);
+  const list = node('ul', 'parts-list');
+  names.forEach((name, i) => {
+    const li = node('li', 'parts-item');
+    li.appendChild(node('span', `parts-swatch ${i === 0 ? 'wf-eligible' : 'wf-removed'}`));
+    li.appendChild(node('span', 'parts-name', i === 0 ? name : `Removed: ${name}`));
+    li.appendChild(node('span', i === 0 ? 'parts-value wf-eligible-value' : 'parts-value', i === 0 ? fmtCount(scaled(w.eligible)) : w.display.labels[i]));
+    list.appendChild(li);
+  });
+  parent.appendChild(list);
+}
+
+function renderProjection(parent, disp, empty) {
+  if (empty) parent.appendChild(node('div', 'chart-empty', EMPTY_TEXT));
+  const table = node('div', 'proj-rows');
+  for (const row of disp.rows) {
+    const line = node('div', `proj-row${row.label === 'Projected revenue' ? ' proj-revenue' : ''}`);
+    line.appendChild(node('span', 'proj-label', row.label));
+    line.appendChild(node('span', 'proj-value', row.value));
+    table.appendChild(line);
+  }
+  parent.appendChild(table);
+}
+
+function renderSegments(container, ctx) {
+  const { model, state } = ctx;
+  if (!state.segment) state.segment = createSegmentState();
+  if (!state.savedSegments) state.savedSegments = [];
+
+  container.textContent = '';
+  const layout = node('div', 'seg-layout');
+  const rail = node('aside', 'seg-rail');
+  const main = node('div', 'seg-main');
+  layout.appendChild(rail);
+  layout.appendChild(main);
+  container.appendChild(layout);
+
+  const banner = node('div', 'seg-banner-slot');
+  const countBox = node('div', 'seg-count-box');
+  const resultsPanel = node('div', 'seg-panel');
+  const savedBox = node('div', 'seg-saved');
+  const nameInput = node('input', 'seg-name');
+
+  function onFilter(key, value) {
+    state.segment = setFilter(state.segment, key, value);
+    paintResults();
+  }
+
+  function buildControl(c) {
+    const f = state.segment.filters;
+    const wrap = node('div', 'ctl');
+    if (c.kind === 'check') {
+      const label = node('label', 'ctl-check');
+      const box = node('input', 'ctl-input');
+      box.type = 'checkbox';
+      box.checked = !!f[c.key];
+      box.setAttribute('data-filter', c.key);
+      box.addEventListener('change', () => onFilter(c.key, !!box.checked));
+      label.appendChild(box);
+      label.appendChild(node('span', 'ctl-text', c.label));
+      wrap.appendChild(label);
+    } else if (c.kind === 'number') {
+      const label = node('label', 'ctl-num');
+      label.appendChild(node('span', 'ctl-text', c.label));
+      const inp = node('input', 'ctl-input ctl-number');
+      inp.type = 'number';
+      if (c.min !== undefined) inp.min = String(c.min);
+      if (c.max !== undefined) inp.max = String(c.max);
+      const cur = f[c.key];
+      inp.value = cur === null || cur === undefined || cur === c.blank ? '' : String(cur);
+      inp.setAttribute('data-filter', c.key);
+      inp.setAttribute('aria-label', c.label);
+      inp.addEventListener('input', () => {
+        const raw = String(inp.value).trim();
+        if (raw === '') { onFilter(c.key, c.blank !== undefined ? c.blank : null); return; }
+        const v = Number(raw);
+        if (Number.isFinite(v)) onFilter(c.key, v);
+      });
+      label.appendChild(inp);
+      wrap.appendChild(label);
+    } else {
+      wrap.appendChild(node('div', 'ctl-text ctl-group-label', c.label));
+      const opts = node('div', 'ctl-multi');
+      for (const o of c.options) {
+        const label = node('label', 'ctl-check');
+        const box = node('input', 'ctl-input');
+        box.type = 'checkbox';
+        box.checked = f[c.key].includes(o.value);
+        box.setAttribute('data-filter', c.key);
+        box.setAttribute('data-value', o.value);
+        box.addEventListener('change', () => {
+          const cur = state.segment.filters[c.key];
+          const next = box.checked ? cur.concat(o.value) : cur.filter((x) => x !== o.value);
+          onFilter(c.key, next);
+        });
+        label.appendChild(box);
+        label.appendChild(node('span', 'ctl-text', o.label));
+        opts.appendChild(label);
+      }
+      wrap.appendChild(opts);
+    }
+    return wrap;
+  }
+
+  function paintRail() {
+    rail.textContent = '';
+    const head = node('div', 'rail-head');
+    head.appendChild(node('h2', 'rail-title', 'Filters'));
+    const reset = node('button', 'btn btn-quiet', 'Reset filters');
+    reset.type = 'button';
+    reset.addEventListener('click', onReset);
+    head.appendChild(reset);
+    rail.appendChild(head);
+    for (const s of SECTIONS) {
+      const sec = node('section', 'rail-section');
+      sec.appendChild(node('h3', 'rail-section-title', s.title));
+      for (const c of s.controls) sec.appendChild(buildControl(c));
+      rail.appendChild(sec);
+    }
+  }
+
+  function onReset() {
+    state.segment = { ...createSegmentState(), channelIds: state.segment.channelIds.slice() };
+    paintRail();
+    paintResults();
+  }
+
+  function onChannel(id) {
+    const cur = state.segment.channelIds;
+    let next = cur.includes(id) ? cur.filter((x) => x !== id) : cur.concat(id);
+    if (!next.length) next = cur;
+    state.segment = { ...state.segment, channelIds: CHANNELS.map((c) => c.id).filter((x) => next.includes(x)) };
+    paintResults();
+  }
+
+  function onSave() {
+    const matched = applyFilters(model.fans, state.segment.filters).length;
+    const name = nameInput.value.trim() || `Segment ${state.savedSegments.length + 1}`;
+    state.savedSegments.push({
+      name,
+      filters: { ...state.segment.filters, plan2026: state.segment.filters.plan2026.slice(), regions: state.segment.filters.regions.slice() },
+      matched,
+    });
+    nameInput.value = '';
+    paintSaved();
+  }
+
+  function onLoad(seg) {
+    state.segment = {
+      ...state.segment,
+      filters: { ...DEFAULT_FILTERS, ...seg.filters, plan2026: seg.filters.plan2026.slice(), regions: seg.filters.regions.slice() },
+      fromRecommendation: null,
+    };
+    paintRail();
+    paintResults();
+  }
+
+  function paintSaved() {
+    savedBox.textContent = '';
+    if (!state.savedSegments.length) return;
+    savedBox.appendChild(node('h3', 'rail-section-title', 'Saved segments'));
+    for (const seg of state.savedSegments) {
+      const row = node('div', 'saved-row');
+      row.appendChild(node('span', 'saved-name', seg.name));
+      row.appendChild(node('span', 'saved-count', `${fmtCount(scaled(seg.matched))} fans`));
+      const b = node('button', 'btn btn-quiet', 'Load');
+      b.type = 'button';
+      b.addEventListener('click', () => onLoad(seg));
+      row.appendChild(b);
+      savedBox.appendChild(row);
+    }
+  }
+
+  // Repaints only the results side, so number inputs in the rail keep focus while typing.
+  function paintResults() {
+    const seg = state.segment;
+    const matchedFans = applyFilters(model.fans, seg.filters);
+    const empty = matchedFans.length === 0;
+    const results = seg.channelIds.map((id) => channelResult(matchedFans, id));
+
+    banner.textContent = '';
+    if (seg.fromRecommendation) {
+      const b = node('div', 'seg-banner');
+      b.appendChild(node('div', 'seg-banner-title', `From recommendation: ${seg.fromRecommendation.name}`));
+      const chips = node('div', 'filter-chips');
+      for (const t of describeFilters(seg.filters)) chips.appendChild(node('span', 'filter-chip', t));
+      b.appendChild(chips);
+      banner.appendChild(b);
+    }
+
+    countBox.textContent = '';
+    countBox.appendChild(node('div', 'seg-count', fmtCount(scaled(matchedFans.length))));
+    countBox.appendChild(node('div', 'seg-count-label', 'fans match these filters'));
+    for (const r of results) {
+      const line = node('div', 'seg-eligible-line');
+      line.appendChild(node('span', 'seg-eligible-name', `Eligible after consent, ${CHANNELS.find((c) => c.id === r.id).label}: `));
+      line.appendChild(node('span', `seg-eligible seg-eligible-${r.id}`, fmtCount(scaled(r.w.eligible))));
+      countBox.appendChild(line);
+    }
+
+    resultsPanel.textContent = '';
+    const chipRow = node('div', 'chan-row');
+    chipRow.appendChild(node('span', 'pf-bar-label', 'Channels'));
+    for (const ch of CHANNELS) {
+      const b = node('button', 'chip-btn', ch.label);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(seg.channelIds.includes(ch.id)));
+      b.setAttribute('data-channel', ch.id);
+      b.addEventListener('click', () => onChannel(ch.id));
+      chipRow.appendChild(b);
+    }
+    resultsPanel.appendChild(chipRow);
+
+    const cols = node('div', 'seg-cols');
+    for (const r of results) {
+      const ch = CHANNELS.find((c) => c.id === r.id);
+      const card = node('section', 'chart-card seg-channel');
+      card.appendChild(node('h3', 'chart-title', ch.label));
+      if (ch.note) card.appendChild(node('p', 'seg-note', ch.note));
+      card.appendChild(node('h4', 'seg-sub', 'Consent waterfall'));
+      renderWaterfall(card, r, empty);
+      card.appendChild(node('h4', 'seg-sub', 'Projected results'));
+      renderProjection(card, r.disp.perChannel[0], empty);
+      card.appendChild(node('p', 'seg-assumption', assumptionText(ch)));
+      cols.appendChild(card);
+    }
+    resultsPanel.appendChild(cols);
+
+    if (results.length > 1) {
+      const combined = combineProjections(results.map((r) => r.proj));
+      const box = node('section', 'chart-card seg-combined');
+      box.appendChild(node('h3', 'chart-title', 'All selected channels'));
+      for (const row of combined) {
+        const line = node('div', 'proj-row proj-revenue');
+        line.appendChild(node('span', 'proj-label', row.label));
+        line.appendChild(node('span', 'proj-value', row.value));
+        box.appendChild(line);
+      }
+      resultsPanel.appendChild(box);
+    }
+  }
+
+  // Save row sits under the rail so both roles can reach it.
+  const saveRow = node('div', 'save-row');
+  nameInput.type = 'text';
+  nameInput.placeholder = 'Segment name';
+  nameInput.setAttribute('aria-label', 'Segment name');
+  const saveBtn = node('button', 'btn', 'Save segment');
+  saveBtn.type = 'button';
+  saveBtn.addEventListener('click', onSave);
+  saveRow.appendChild(nameInput);
+  saveRow.appendChild(saveBtn);
+
+  main.appendChild(node('p', 'sys-intro', 'Build an audience from linked attributes. Consent and minors rules apply before anything is sent.'));
+  const top = node('div', 'seg-top');
+  top.appendChild(node('h2', 'seg-title', 'Segment Builder'));
+  top.appendChild(countBox);
+  main.appendChild(top);
+  main.appendChild(banner);
+  main.appendChild(resultsPanel);
+  main.appendChild(saveRow);
+  main.appendChild(savedBox);
+
+  paintRail();
+  paintSaved();
+  paintResults();
+}
+
+module.exports = { renderSegments, describeFilters, CONTROL_BY_KEY };
+
+},
+"ui/tab-systems.js": function (module, exports, require) {
+// Tabs 1–3: one source system on its own. Same layout and callout style on all three.
+const { renderChart, renderKpis } = require('./charts');
+
+const MAX_CHARTS = 4;
+
+function node(tag, className, text) {
+  const n = document.createElement(tag);
+  if (className) n.className = className;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+function renderSystemTab(container, view) {
+  container.textContent = '';
+  container.appendChild(node('p', 'sys-intro', view.intro));
+  const kpis = node('div', 'kpis');
+  container.appendChild(kpis);
+  renderKpis(kpis, view.kpis);
+  const grid = node('div', 'charts');
+  container.appendChild(grid);
+  for (const spec of view.charts.slice(0, MAX_CHARTS)) {
+    const card = node('section', 'chart-card');
+    card.appendChild(node('h3', 'chart-title', spec.title));
+    const box = node('div', 'chart-box');
+    card.appendChild(box);
+    grid.appendChild(card);
+    renderChart(box, spec);
+  }
+  const callout = node('aside', 'cant-tell');
+  callout.appendChild(node('h3', 'cant-tell-title', "What this system can't tell you"));
+  callout.appendChild(node('p', 'cant-tell-body', view.cantTell));
+  container.appendChild(callout);
+}
+
+module.exports = { renderSystemTab };
+
+},
+"views-fan360.js": function (module, exports, require) {
+// Tab 4: what linking the three systems shows. Person counts are scaled ×SCALE;
+// per-fan values (annual value by number of systems) are not.
+const { scaled, fmtCount, fmtMoney, fmtPct, fmtMultiple, roundParts } = require('./format');
+const { normEmail } = require('./fans');
+
+const mean = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
+
+function fan360Metrics(world, linkage, fans) {
+  const { stats } = linkage;
+  const multi = fans.filter((f) => f.systems >= 2);
+  const single = fans.filter((f) => f.systems === 1);
+  const anonTxns = world.fnbAnonymous.reduce((a, g) => a + g.txns, 0);
+
+  // Combined marketing list: every email held in ticketing, groups and identified F&B.
+  const listEmails = new Set();
+  for (const t of world.ticketing) if (t.email) listEmails.add(normEmail(t.email));
+  for (const g of world.groups) {
+    if (g.organizer.email) listEmails.add(normEmail(g.organizer.email));
+    for (const k of g.knownAttendees) if (k.email) listEmails.add(normEmail(k.email));
+  }
+  for (const t of world.fnbIdentified) if (t.email) listEmails.add(normEmail(t.email));
+  const fanByEmail = new Map();
+  for (const f of fans) for (const e of f.emails) fanByEmail.set(e, f.fanId);
+  const fansWithEmail = new Set();
+  for (const e of listEmails) {
+    const id = fanByEmail.get(e);
+    if (id !== undefined) fansWithEmail.add(id);
+  }
+
+  return {
+    recordsPerFan: stats.sourceRecords / stats.resolvedFans,
+    multiSystemShare: multi.length / fans.length,
+    valueMultiple: mean(multi.map((f) => f.annualValue)) / mean(single.map((f) => f.annualValue)),
+    fnbIdentifiedShare: world.fnbIdentified.length / (world.fnbIdentified.length + anonTxns),
+    dupContactShare: (listEmails.size - fansWithEmail.size) / listEmails.size,
+    // supporting counts (raw, unscaled)
+    multiCount: multi.length,
+    listEmails: listEmails.size,
+    duplicateEmails: listEmails.size - fansWithEmail.size,
+    meanValue: { single: mean(single.map((f) => f.annualValue)), multi: mean(multi.map((f) => f.annualValue)) },
+  };
+}
+
+function fan360View(world, linkage, fans) {
+  const { stats } = linkage;
+  const m = fan360Metrics(world, linkage, fans);
+
+  const funnel = {
+    ...roundParts([scaled(stats.resolvedFans), scaled(stats.sourceRecords - stats.resolvedFans)]),
+    names: ['Resolved fans', 'Duplicate records merged'],
+  };
+  const conf = stats.byConfidence;
+  const matchBreakdown = {
+    ...roundParts([scaled(conf.high), scaled(conf.medium), scaled(conf.low)]),
+    names: ['High (email/phone)', 'Medium (name + ZIP)', 'Low (shown, not merged)'],
+  };
+
+  // Overlap of the three systems: which combination each fan appears in.
+  const combos = [
+    ['Ticketing only', 'T'], ['F&B & Retail only', 'F'], ['Groups & Experiences only', 'G'],
+    ['Ticketing + F&B', 'TF'], ['Ticketing + Groups', 'TG'], ['F&B + Groups', 'FG'], ['All three', 'TFG'],
+  ];
+  const sysKey = (f) => {
+    const src = new Set(f.nodes.map((n) => n.source));
+    return (src.has('ticketing') ? 'T' : '') + (src.has('fnb') ? 'F' : '')
+      + (src.has('groups') || src.has('experiences') ? 'G' : '');
+  };
+  const comboCount = Object.fromEntries(combos.map(([, k]) => [k, 0]));
+  for (const f of fans) comboCount[sysKey(f)]++;
+  // Same split as the value-multiple KPI: single-system vs. 2+ systems.
+  const valueData = [Math.round(m.meanValue.single), Math.round(m.meanValue.multi)];
+  // Tab 2 shows the identified share to one decimal; derive the anonymous share from that
+  // displayed figure so the two always add to 100.0% on screen.
+  const identifiedShown = fmtPct(m.fnbIdentifiedShare, 1);
+  const anonShown = `${(100 - parseFloat(identifiedShown)).toFixed(1)}%`;
+
+  const kpis = [
+    { id: 'resolvedFans', label: 'Resolved fans', value: fmtCount(scaled(fans.length)) },
+    { id: 'multiSystem', label: 'Fans in 2+ systems', value: fmtPct(m.multiSystemShare) },
+    { id: 'valueMultiple', label: 'Annual value, multi-system vs. single-system fans', value: fmtMultiple(m.valueMultiple), size: 'large' },
+    { id: 'anonFnb', label: 'F&B transactions with no person attached', value: anonShown },
+    { id: 'dupContacts', label: 'Duplicate contacts removed from the marketing list', value: fmtCount(scaled(m.duplicateEmails)),
+      note: `${fmtPct(m.dupContactShare)} of ${fmtCount(scaled(m.listEmails))} emails` },
+  ];
+
+  const overlap = {
+    id: 'overlap', type: 'bar', unit: 'count', indexAxis: 'y', title: 'Where each resolved fan appears',
+    labels: combos.map(([l]) => l),
+    series: [{ name: 'Fans', data: combos.map(([, k]) => scaled(comboCount[k])) }],
+  };
+  const valueBySystems = {
+    id: 'valueBySystems', type: 'bar', unit: 'money', title: 'Average annual known spend per fan: one system vs. two or more',
+    labels: ['1 system', '2+ systems'],
+    series: [{ name: 'Annual value per fan', data: valueData }],
+    highlightIndex: 1,
+  };
+
+  const takeaways = {
+    funnel: `${funnel.totalLabel} source records resolve to ${funnel.labels[0]} fans once duplicates across systems are merged.`,
+    matchBreakdown: `Most links rest on an exact email or phone match; ${matchBreakdown.labels[2]} weaker lookalikes are shown for review, not merged.`,
+    overlap: `${fmtPct(m.multiSystemShare)} of fans show up in more than one system, and no single system sees them whole.`,
+    valueBySystems: `Fans in 2+ systems are worth ${fmtMultiple(m.valueMultiple)} a single-system fan each year (${fmtMoney(m.meanValue.multi)} vs. ${fmtMoney(m.meanValue.single)}).`,
+  };
+
+  return { kpis, funnel, matchBreakdown, overlap, valueBySystems, takeaways, metrics: m };
+}
+
+module.exports = { fan360View, fan360Metrics };
+
+},
+"views-profile.js": function (module, exports, require) {
+// Tab 5: fan search and the role-masked unified profile. Per-person values are not scaled.
+const { SEASONS, PLANS, CHANNELS } = require('./config');
+const { fmtMoney } = require('./format');
+
+const ROLES = { sales: 'Ticket Sales Rep', privacy: 'Privacy & Data Governance' };
+const HERO_ORDER = ['H1', 'H2', 'H3', 'H4'];
+const MAX_RESULTS = 20;
+const RESTRICTED = 'Restricted';
+
+// Children are not Fans, so a search over fans can never return one.
+function searchFans(fans, query) {
+  const q = String(query || '').trim().toLowerCase();
+  const heroes = HERO_ORDER.map((id) => fans.find((f) => f.heroId === id)).filter(Boolean);
+  if (!q) return heroes;
+  const hit = (f) => f.name.toLowerCase().includes(q) || f.emails.some((e) => e.toLowerCase().includes(q));
+  const out = heroes.filter(hit);
+  for (const f of fans) {
+    if (out.length >= MAX_RESULTS) break;
+    if (!f.heroId && hit(f)) out.push(f);
+  }
+  return out.slice(0, MAX_RESULTS);
+}
+
+const STATUS_LABEL = { opt_in: 'Opted in', opt_out: 'Opted out', none: 'No record' };
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+// world indexes are built once per world.
+const indexes = new WeakMap();
+function worldIndex(world) {
+  let ix = indexes.get(world);
+  if (ix) return ix;
+  ix = {
+    games: new Map(world.games.map((g) => [g.gameId, g])),
+    groups: new Map(world.groups.map((g) => [g.bookingId, g])),
+    experiences: new Map(world.experiences.map((e) => [e.expId, e])),
+  };
+  indexes.set(world, ix);
+  return ix;
+}
+
+function nodeConfidence(fan) {
+  const best = new Map();
+  for (const e of fan.evidence) {
+    const rank = e.method === 'fuzzy' ? 'medium' : 'high';
+    for (const id of [e.a, e.b]) if (best.get(id) !== 'high') best.set(id, rank);
+  }
+  return (node) => best.get(node.id) || 'high';
+}
+
+function swimlanes(fan, world) {
+  const ix = worldIndex(world);
+  const ticketing = [], fnb = [], groups = [];
+  const lastDate = (yr) => `${yr}-09-30`;
+  for (const yr of SEASONS) {
+    const parts = [];
+    if (fan.ticketGames[yr] > 0) parts.push(`${fan.ticketGames[yr]} games`);
+    if (fan.plans[yr] !== 'none') parts.push(PLANS[fan.plans[yr]]);
+    if (parts.length) ticketing.push({ season: yr, date: lastDate(yr), kind: 'attendance', label: parts.join(', ') });
+    if (fan.transfersSent[yr] > 0) ticketing.push({ season: yr, date: lastDate(yr), kind: 'transfer', label: `${fan.transfersSent[yr]} tickets transferred` });
+    if (fan.fnbSpend[yr] > 0) {
+      const retail = fan.retailOrApp[yr] ? ' (includes Team Store or app)' : '';
+      fnb.push({ season: yr, date: lastDate(yr), kind: 'spend', label: `${fmtMoney(Math.round(fan.fnbSpend[yr]))} F&B${retail}` });
+    }
+  }
+  for (const n of fan.nodes) {
+    if (n.source === 'groups') {
+      const g = ix.groups.get(n.id.split(':')[0]);
+      if (!g) continue;
+      const game = ix.games.get(g.gameId);
+      const role = n.id.endsWith(':organizer') ? '' : ' (attendee)';
+      groups.push({ season: g.season, date: game ? game.date : lastDate(g.season), kind: 'group', label: `Group outing: ${g.type}${role}` });
+    } else if (n.source === 'experiences') {
+      const e = ix.experiences.get(n.id);
+      if (e) groups.push({ season: e.season, date: lastDate(e.season), kind: 'experience', label: `Experience: ${e.kind}` });
+    }
+  }
+  groups.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  return [
+    { system: 'Ticketing & Entry', events: ticketing },
+    { system: 'F&B & Retail', events: fnb },
+    { system: 'Groups & Experiences', events: groups },
+  ];
+}
+
+function fanProfileView(fan, role, world) {
+  const privacy = role === 'privacy';
+  const field = (group, label, value, restrictedForSales = false) => (
+    restrictedForSales && !privacy
+      ? { group, label, value: RESTRICTED, restricted: true }
+      : { group, label, value: String(value), restricted: false });
+
+  const fields = [
+    field('Contact', 'Email', fan.emails.join(', ') || 'None on file', true),
+    field('Contact', 'Phone', fan.phones.join(', ') || 'None on file', true),
+    field('Contact', 'ZIP', fan.zip, true),
+    field('Contact', 'Region', fan.region),
+  ];
+  for (const yr of SEASONS) {
+    fields.push(field('Ticketing', `${yr} plan`, PLANS[fan.plans[yr]]));
+  }
+  fields.push(
+    field('Ticketing', '2026 games attended (incl. group outings)', fan.games[2026]),
+    field('Ticketing', '2026 tickets transferred', fan.transfersSent[2026]),
+    field('F&B', '2026 F&B spend', fmtMoney(Math.round(fan.fnbSpend[2026]))),
+    field('Engagement', 'Group outings', fan.groupOutings),
+    field('Engagement', 'Survey satisfaction', fan.surveySat === null ? 'No response' : `${fan.surveySat} of 10`),
+  );
+  for (const ch of CHANNELS.filter((c) => c.id !== 'social')) {
+    const d = fan.consentDetail[ch.id];
+    fields.push(field('Consent', `${ch.label} status`, STATUS_LABEL[fan.consent[ch.id]]));
+    fields.push(field('Consent', `${ch.label} source and date`, d ? `${d.source}, ${d.date}` : 'No record', true));
+  }
+  fields.push(field('Consent', 'Do-not-contact', fan.dnc ? 'Yes' : 'No'));
+  fields.push(
+    field('Linkage', 'Match confidence', fan.confidence),
+    field('Linkage', 'Match evidence', fan.evidence.length
+      ? fan.evidence.map((e) => `${e.a} to ${e.b} by ${e.method}`).join('; ')
+      : 'Single source record', true),
+  );
+
+  const conf = nodeConfidence(fan);
+  const sources = fan.nodes.map((n) => ({ source: n.source, id: n.id, confidence: conf(n) }));
+
+  const kids = fan.kidsClubChildren;
+  let household = [];
+  if (kids.length) {
+    household = privacy
+      ? kids.map((k, i) => ({ label: 'Kids Club', value: `Member ${i + 1}: active, joined ${k.joinDate}`, restricted: false }))
+      : [{ label: 'Kids Club', value: `${plural(kids.length, 'Kids Club member', 'Kids Club members')} (restricted)`, restricted: true }];
+  }
+
+  return {
+    header: {
+      fanId: fan.fanId, name: fan.name, heroId: fan.heroId, region: fan.region,
+      role, roleLabel: ROLES[role], confidence: fan.confidence, systems: fan.systems,
+    },
+    fields,
+    swimlanes: swimlanes(fan, world),
+    sources,
+    household,
+  };
+}
+
+module.exports = { searchFans, fanProfileView, ROLES };
+
+},
+"views-systems.js": function (module, exports, require) {
+// Tabs 1–3: what each source system can show on its own, before linking.
+// Every count is an aggregate over the sample, scaled ×SCALE; per-game ratios are not scaled.
+const { SEASONS, GATES, PLANS, GROUP_TYPES, PREMIUM_AREAS } = require('./config');
+const { scaled, fmtCount, fmtMoney, fmtPct } = require('./format');
+
+const LAST = SEASONS[SEASONS.length - 1];
+const PLAN_ORDER = ['season_pre', 'choice', 'reserved', 'starter', 'ballpark_pass', 'triple_play', 'single'];
+const seasonLabels = SEASONS.map(String);
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+
+function gamesBySeason(world) {
+  const out = {};
+  for (const yr of SEASONS) out[yr] = world.games.filter((g) => g.season === yr);
+  return out;
+}
+
+function ticketingView(world) {
+  const perGame = new Map();
+  const gate = {};
+  for (const yr of SEASONS) gate[yr] = Object.fromEntries(GATES.map((g) => [g.id, 0]));
+  let ticketed = 0;
+  for (const s of world.scans) {
+    perGame.set(s.gameId, (perGame.get(s.gameId) || 0) + 1);
+    gate[s.season][s.gate]++;
+    if (s.tktId && s.season === LAST) ticketed++;
+  }
+  const bySeason = gamesBySeason(world);
+  const maxGames = Math.max(...SEASONS.map((yr) => bySeason[yr].length));
+  const attendance = SEASONS.map((yr) => ({
+    name: String(yr),
+    data: Array.from({ length: maxGames }, (_, i) => (bySeason[yr][i] ? scaled(perGame.get(bySeason[yr][i].gameId) || 0) : null)),
+    highlight: yr === LAST || undefined,
+  }));
+
+  const planCount = {};
+  const transfers = {};
+  let noShows = 0;
+  for (const yr of SEASONS) { planCount[yr] = Object.fromEntries(PLAN_ORDER.map((p) => [p, 0])); transfers[yr] = 0; }
+  for (const t of world.ticketing) {
+    for (const yr of SEASONS) {
+      const s = t.seasons[yr];
+      if (s.plan !== 'none') planCount[yr][s.plan]++;
+      transfers[yr] += s.transfersSent;
+      if (yr === LAST) noShows += s.noShows;
+    }
+  }
+  const planSeries = PLAN_ORDER.filter((p) => SEASONS.some((yr) => planCount[yr][p] > 0))
+    .map((p) => ({ name: PLANS[p], data: SEASONS.map((yr) => scaled(planCount[yr][p])) }));
+
+  const totalScans = world.scans.length;
+  const lastScans = sum(Object.values(gate[LAST]));
+  const gateData = GATES.map((g) => scaled(gate[LAST][g.id]));
+  const busiest = gateData.indexOf(Math.max(...gateData));
+  const noShowRate = noShows / (ticketed + noShows);
+
+  return {
+    intro: 'Every scan and plan sold through the ticketing platform and team app, three seasons. It shows how many tickets were used and where fans walked in.',
+    kpis: [
+      { id: 'scans', label: `Scans, ${SEASONS[0]}–${LAST}`, value: fmtCount(scaled(totalScans)) },
+      { id: 'avgAttendance', label: `Average scans per game, ${LAST}`, value: fmtCount(scaled(lastScans) / bySeason[LAST].length) },
+      { id: 'noShowRate', label: `No-show rate on ticketed seats, ${LAST}`, value: fmtPct(noShowRate) },
+      { id: 'transfers', label: `Tickets transferred, ${LAST}`, value: fmtCount(scaled(transfers[LAST])) },
+    ],
+    charts: [
+      { id: 'attendanceByGame', type: 'line', unit: 'count', title: 'Scans by home game, 2024–2026',
+        labels: Array.from({ length: maxGames }, (_, i) => `Game ${i + 1}`), series: attendance },
+      { id: 'planMix', type: 'bar', unit: 'count', stacked: true, title: 'Ticket plans by season (accounts)', labels: seasonLabels, series: planSeries },
+      { id: 'scansByGate', type: 'bar', unit: 'count', title: `Scans by gate, ${LAST}`, labels: GATES.map((g) => g.label),
+        series: [{ name: 'Scans', data: gateData }], highlightIndex: busiest },
+      { id: 'transfers', type: 'bar', unit: 'count', title: 'Tickets transferred by season', labels: seasonLabels,
+        series: [{ name: 'Transfers sent', data: SEASONS.map((yr) => scaled(transfers[yr])) }], highlightIndex: SEASONS.length - 1 },
+    ],
+    cantTell: 'Who is actually in the seat when a ticket is transferred, or what they spend once inside.',
+  };
+}
+
+function fnbView(world) {
+  const bySeason = gamesBySeason(world);
+  const revByGame = new Map();
+  const cat = {};
+  const venue = {};
+  const txns = { identified: world.fnbIdentified.length, anonymous: 0 };
+  for (const yr of SEASONS) {
+    cat[yr] = { food: 0, beverage: 0, merch: 0 };
+    venue[yr] = { concessions: 0, mobile: 0, team_store: 0 };
+  }
+  for (const a of world.fnbAnonymous) {
+    revByGame.set(a.gameId, (revByGame.get(a.gameId) || 0) + a.revenue);
+    txns.anonymous += a.txns;
+    for (const c of ['food', 'beverage', 'merch']) cat[a.season][c] += a.byCategory[c];
+    // Anonymous swipes: food and beverage at the stands, merchandise at the Team Store.
+    venue[a.season].concessions += a.byCategory.food + a.byCategory.beverage;
+    venue[a.season].team_store += a.byCategory.merch;
+  }
+  for (const t of world.fnbIdentified) {
+    if (t.gameId) revByGame.set(t.gameId, (revByGame.get(t.gameId) || 0) + t.amount);
+    cat[t.season][t.category] += t.amount;
+    venue[t.season][t.venue] += t.amount;
+  }
+  const scansByGame = new Map();
+  for (const s of world.scans) if (s.season === LAST) scansByGame.set(s.gameId, (scansByGame.get(s.gameId) || 0) + 1);
+  const lastGames = bySeason[LAST];
+  const revenue = lastGames.map((g) => Math.round(scaled(revByGame.get(g.gameId) || 0)));
+  const perCap = lastGames.map((g) => Math.round(((revByGame.get(g.gameId) || 0) / (scansByGame.get(g.gameId) || 1)) * 100) / 100);
+  const inParkLast = sum(lastGames.map((g) => revByGame.get(g.gameId) || 0));
+  const scansLast = sum([...scansByGame.values()]);
+  const totalLast = cat[LAST].food + cat[LAST].beverage + cat[LAST].merch;
+  const identifiedShare = txns.identified / (txns.identified + txns.anonymous);
+  const money = (v) => Math.round(scaled(v));
+
+  return {
+    intro: 'Concession stands, mobile orders and the Team Store. Plenty of revenue detail, very little about who is buying.',
+    kpis: [
+      { id: 'revenue', label: `F&B and retail revenue, ${LAST}`, value: fmtMoney(scaled(totalLast)) },
+      { id: 'perCap', label: `In-park spend per scan, ${LAST}`, value: fmtMoney(inParkLast / scansLast) },
+      { id: 'identifiedShare', label: 'Transactions tied to a person', value: fmtPct(identifiedShare, 1) },
+    ],
+    charts: [
+      { id: 'revenueByGame', type: 'line', unit: 'money', title: `F&B revenue and per-cap by game, ${LAST}`,
+        labels: lastGames.map((_, i) => `Game ${i + 1}`),
+        series: [{ name: 'Revenue', data: revenue, axis: 'y' }, { name: 'Per-cap', data: perCap, axis: 'y2' }] },
+      { id: 'categoryMix', type: 'bar', unit: 'money', stacked: true, title: 'Revenue by category and season', labels: seasonLabels,
+        series: [['food', 'Food'], ['beverage', 'Beverage'], ['merch', 'Merchandise']]
+          .map(([k, name]) => ({ name, data: SEASONS.map((yr) => money(cat[yr][k])) })) },
+      { id: 'venueMix', type: 'bar', unit: 'money', stacked: true, title: 'Team Store vs. concessions by season', labels: seasonLabels,
+        series: [['concessions', 'Concessions'], ['mobile', 'Mobile orders'], ['team_store', 'Team Store']]
+          .map(([k, name]) => ({ name, data: SEASONS.map((yr) => money(venue[yr][k])) })) },
+      { id: 'identifiedShare', type: 'doughnut', unit: 'count', title: 'Transactions tied to a person, 2024–2026',
+        labels: ['Tied to a person', 'Anonymous card swipe'],
+        series: [{ name: 'Transactions', data: [scaled(txns.identified), scaled(txns.anonymous)] }], highlightIndex: 0 },
+    ],
+    cantTell: 'Who most of these buyers are, or whether the fan at the Team Store is the same fan who holds a ticket plan.',
+  };
+}
+
+function medianInt(values) {
+  const v = values.slice().sort((a, b) => a - b);
+  const mid = v.length >> 1;
+  return v.length % 2 ? v[mid] : Math.round((v[mid - 1] + v[mid]) / 2);
+}
+
+function groupsView(world) {
+  const PREMIUM = new Set(PREMIUM_AREAS);
+  const byType = {};
+  const people = {};
+  const exp = {};
+  for (const yr of SEASONS) {
+    byType[yr] = Object.fromEntries(GROUP_TYPES.map((t) => [t, 0]));
+    people[yr] = { organizers: 0, known: 0, headcount: 0 };
+    exp[yr] = { tour: 0, suite: 0, rooftop_deck: 0, premiumGroups: 0 };
+  }
+  for (const g of world.groups) {
+    byType[g.season][g.type]++;
+    const p = people[g.season];
+    p.organizers++;
+    p.known += g.knownAttendees.length;
+    p.headcount += Math.max(0, g.size - 1 - g.knownAttendees.length);
+    if (PREMIUM.has(g.seatArea)) exp[g.season].premiumGroups++;
+  }
+  for (const e of world.experiences) exp[e.season][e.kind]++;
+  const lastBookings = world.groups.filter((g) => g.season === LAST);
+  const lastAttendees = sum(lastBookings.map((g) => g.size));
+  const lastNamed = people[LAST].organizers + people[LAST].known;
+  const others = medianInt(world.groups.map((g) => g.size)) - 1;
+
+  return {
+    intro: 'Group outings, ballpark tours, suites and the Rooftop Deck. The organizer is known; most of the people they bring are a headcount.',
+    kpis: [
+      { id: 'bookings', label: `Group bookings, ${LAST}`, value: fmtCount(scaled(lastBookings.length)) },
+      { id: 'attendees', label: `Group attendees, ${LAST}`, value: fmtCount(scaled(lastAttendees)) },
+      { id: 'namedShare', label: 'Group attendees with a name on file', value: fmtPct(lastNamed / lastAttendees) },
+    ],
+    charts: [
+      { id: 'bookingsByType', type: 'bar', unit: 'count', title: 'Group bookings by type and season', labels: GROUP_TYPES,
+        series: SEASONS.map((yr) => ({ name: String(yr), data: GROUP_TYPES.map((t) => scaled(byType[yr][t])), highlight: yr === LAST || undefined })) },
+      { id: 'knownVsHeadcount', type: 'bar', unit: 'count', stacked: true, title: 'Organizers vs. total attendees', labels: seasonLabels,
+        series: [
+          { name: 'Organizers', data: SEASONS.map((yr) => scaled(people[yr].organizers)) },
+          { name: 'Known via booking link', data: SEASONS.map((yr) => scaled(people[yr].known)) },
+          { name: 'Headcount only', data: SEASONS.map((yr) => scaled(people[yr].headcount)), highlight: true },
+        ] },
+      { id: 'toursPremium', type: 'bar', unit: 'count', title: 'Tours and premium bookings by season', labels: seasonLabels,
+        series: [
+          { name: 'Ballpark tours', data: SEASONS.map((yr) => scaled(exp[yr].tour)) },
+          { name: 'Suites', data: SEASONS.map((yr) => scaled(exp[yr].suite)) },
+          { name: 'Rooftop Deck', data: SEASONS.map((yr) => scaled(exp[yr].rooftop_deck)) },
+          { name: 'Group outings in premium areas', data: SEASONS.map((yr) => scaled(exp[yr].premiumGroups)) },
+        ] },
+    ],
+    cantTell: `Whether the ${others} other people in a group ever come back on their own.`,
+    medianOthers: others,
+  };
+}
+
+module.exports = { ticketingView, fnbView, groupsView };
+
+}
+};
+var __cache = {};
+function __resolve(from, req) {
+  var parts = req.charAt(0) === '.' ? from.split('/').slice(0, -1).concat(req.split('/')) : req.split('/');
+  var out = [];
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i] === '.' || parts[i] === '') continue;
+    if (parts[i] === '..') out.pop(); else out.push(parts[i]);
+  }
+  var key = out.join('/');
+  if (!/\.js$/.test(key)) key += '.js';
+  return key;
+}
+function __load(key) {
+  if (__cache[key]) return __cache[key].exports;
+  if (!__defs[key]) throw new Error('Module not found: ' + key);
+  var module = { exports: {} };
+  __cache[key] = module;
+  __defs[key].call(module.exports, module, module.exports, function (req) { return __load(__resolve(key, req)); });
+  return module.exports;
+}
+globalThis.__require = __load;
+__load('ui/main.js');
+})();
+</script>
+</body>
+</html>

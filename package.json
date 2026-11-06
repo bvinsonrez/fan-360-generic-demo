@@ -1,0 +1,1 @@
+{"name":"fan-360-generic-demo","private":true,"engines":{"node":">=18"},"scripts":{"test":"node --test --test-concurrency=1 test/*.test.js","build":"node build.js"}}
