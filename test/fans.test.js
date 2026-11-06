@@ -152,3 +152,12 @@ test('dup contacts count only real fans', () => {
 test('model carries six recommendation cards', () => {
   assert.equal(M.recommendations.length, 6);
 });
+
+test('season-ramp charts carry no accent; accent charts highlight one thing', () => {
+  const charts = ['ticketing', 'fnb', 'groups'].flatMap((v) => M.views[v].charts);
+  for (const c of charts) {
+    const n = c.series.filter((s) => s.highlight).length + (c.highlightIndex !== undefined ? 1 : 0);
+    if (c.seasonSeries) assert.equal(n, 0, c.id);
+    assert.ok(n <= 1, c.id);
+  }
+});

@@ -53,7 +53,7 @@ const CHANNELS = [
 
 const PALETTE = {
   primary: '#004987',
-  accent: '#7E3DA0',
+  accent: '#D9730D',
   ink: '#1B2733',
   slate: '#5B6B7B',
   grey: '#9AA5B1',

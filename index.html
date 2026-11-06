@@ -8,7 +8,7 @@
 <title>Fan 360 Demo</title>
 <style>
 :root {
-  --primary: #004987; --accent: #7E3DA0; --ink: #1B2733; --slate: #5B6B7B;
+  --primary: #004987; --accent: #D9730D; --ink: #1B2733; --slate: #5B6B7B;
   --grey: #9AA5B1; --grey-light: #D5DBE1; --surface: #F4F6F8; --white: #FFFFFF;
 }
 * { box-sizing: border-box; }
@@ -67,7 +67,7 @@ body {
 .parts-bar { display: flex; height: 26px; border-radius: 4px; overflow: hidden; margin: 6px 0 8px; gap: 2px; }
 .parts-seg { min-width: 4px; }
 .parts-seg-0 { background: var(--primary); }
-.parts-seg-1 { background: #4A86C5; }
+.parts-seg-1 { background: #5E93CF; }
 .parts-seg-2 { background: var(--grey); }
 .parts-list { list-style: none; margin: 0 0 6px; padding: 0; }
 .parts-item { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 14px; }
@@ -109,7 +109,7 @@ body {
 .lane-cell { background: var(--surface); border-radius: 4px; min-height: 44px; padding: 3px; display: flex; flex-direction: column; gap: 3px; }
 .lane-event { font-size: 12px; background: var(--primary); color: var(--white); border-radius: 3px; padding: 1px 5px; }
 .lane-transfer { background: var(--grey); color: var(--ink); }
-.lane-group, .lane-experience { background: #4A86C5; }
+.lane-group, .lane-experience { background: #5E93CF; }
 @media (max-width: 900px) { .pf-cols { grid-template-columns: 1fr; } }
 
 /* Tab 6 */
@@ -257,7 +257,7 @@ const CHANNELS = [
 
 const PALETTE = {
   primary: '#004987',
-  accent: '#7E3DA0',
+  accent: '#D9730D',
   ink: '#1B2733',
   slate: '#5B6B7B',
   grey: '#9AA5B1',
@@ -2157,8 +2157,14 @@ const { fmtChartValue } = require('../format');
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 const LABEL_PX = 12;
-// Non-highlighted series cycle: primary and one neutral, then tints of the same two.
-const CYCLE = [PALETTE.primary, PALETTE.grey, '#4A86C5', PALETTE.greyLight, '#8FB3D9', PALETTE.slate, '#C3D6EA'];
+// Color rules, in order:
+// 1. Seasons are ordinal: a light-to-dark blue ramp, newest season darkest.
+// 2. The accent marks the one thing the chart title asks you to notice; everything else
+//    in that chart drops to grey so the accent is the only saturated mark.
+// 3. Otherwise categories cycle from the primary blue through its tints and neutrals.
+const SEASON_RAMP = ['#BFD3EA', '#5E93CF', PALETTE.primary];
+const CONTEXT = [PALETTE.greyLight, PALETTE.grey, PALETTE.slate];
+const CYCLE = [PALETTE.primary, PALETTE.grey, '#5E93CF', PALETTE.greyLight, '#BFD3EA', PALETTE.slate];
 const EMPTY_TEXT = 'No fans match these filters';
 
 const live = new Map();
@@ -2185,9 +2191,22 @@ function isAllZero(spec) {
 }
 
 function seriesColors(spec) {
+  if (spec.seasonSeries) {
+    const off = SEASON_RAMP.length - spec.series.length;
+    return spec.series.map((_, i) => SEASON_RAMP[Math.max(0, i + off)]);
+  }
   let n = 0;
-  return spec.series.map((s) => (s.highlight ? PALETTE.accent : CYCLE[n++ % CYCLE.length]));
+  if (spec.series.some((s) => s.highlight)) return spec.series.map((s) => (s.highlight ? PALETTE.accent : CONTEXT[n++ % CONTEXT.length]));
+  return spec.series.map(() => CYCLE[n++ % CYCLE.length]);
 }
+
+// Text color for a label drawn on a filled shape: white only where it reads at 4.5:1.
+function lum(hex) {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function labelOn(bg) { return 1.05 / (lum(bg) + 0.05) >= 4.5 ? PALETTE.white : PALETTE.ink; }
 
 function isDonut(spec) { return spec.type === 'doughnut' || spec.type === 'donut'; }
 function isHorizontal(spec) { return spec.type === 'hbar' || spec.indexAxis === 'y'; }
@@ -2203,11 +2222,12 @@ function buildDatasets(spec) {
   return spec.series.map((s, si) => {
     const base = { label: s.name, data: s.data };
     if (spec.type === 'line') {
-      return { ...base, borderColor: colors[si], backgroundColor: colors[si], borderWidth: s.highlight ? 2.5 : 1.5,
+      const strong = s.highlight || (spec.seasonSeries && si === spec.series.length - 1) || spec.series.length === 1;
+      return { ...base, borderColor: colors[si], backgroundColor: colors[si], borderWidth: strong ? 2.5 : 1.5,
         pointRadius: 0, pointHoverRadius: 4, tension: 0.2, spanGaps: false, yAxisID: s.axis || 'y' };
     }
     const bg = spec.series.length === 1 && hi !== undefined
-      ? s.data.map((_, i) => (i === hi ? PALETTE.accent : PALETTE.primary))
+      ? s.data.map((_, i) => (i === hi ? PALETTE.accent : PALETTE.grey))
       : colors[si];
     return { ...base, backgroundColor: bg, borderColor: PALETTE.white, borderWidth: spec.stacked ? 1 : 0, maxBarThickness: 56 };
   });
@@ -2230,7 +2250,7 @@ function buildScales(spec) {
   const categoryAxis = {
     stacked: !!spec.stacked,
     grid: { display: false },
-    ticks: { font: axisTitleFont(), color: PALETTE.slate, autoSkip: true, maxTicksLimit: spec.type === 'line' ? 9 : 12, maxRotation: 0 },
+    ticks: { font: axisTitleFont(), color: PALETTE.slate, autoSkip: spec.type === 'line', maxTicksLimit: spec.type === 'line' ? 9 : 12, maxRotation: 0 },
   };
   const scales = horizontal ? { x: valueAxis({ position: 'bottom' }), y: categoryAxis } : { x: categoryAxis, y: valueAxis({ position: 'left' }) };
   if (spec.series.some((s) => s.axis === 'y2')) {
@@ -2245,8 +2265,8 @@ function valueLabelPlugin(spec) {
     id: 'valueLabels',
     afterDatasetsDraw(chart) {
       const donut = isDonut(spec);
-      const points = spec.series.length * spec.labels.length;
-      if (spec.type === 'line' || spec.stacked || (!donut && points > 12)) return;
+      // Label single-series bars and donuts only; multi-series charts read from the axis.
+      if (spec.type === 'line' || spec.stacked || (!donut && spec.series.length > 1)) return;
       const ctx = chart.ctx;
       ctx.save();
       ctx.font = `600 ${LABEL_PX}px ${FONT}`;
@@ -2257,7 +2277,7 @@ function valueLabelPlugin(spec) {
           if (v === null || v === undefined || v === 0) return;
           const text = fmtChartValue(v, spec.unit);
           if (donut) {
-            ctx.fillStyle = PALETTE.white;
+            ctx.fillStyle = labelOn(ds.backgroundColor[i]);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             const p = arc.tooltipPosition();
@@ -3530,11 +3550,17 @@ module.exports = { searchFans, fanProfileView, ROLES };
 "views-systems.js": function (module, exports, require) {
 // Tabs 1–3: what each source system can show on its own, before linking.
 // Every count is an aggregate over the sample, scaled ×SCALE; per-game ratios are not scaled.
-const { SEASONS, GATES, PLANS, GROUP_TYPES, PREMIUM_AREAS } = require('./config');
+const { SEASONS, GATES, GROUP_TYPES, PREMIUM_AREAS, MEMBER_PLANS } = require('./config');
 const { scaled, fmtCount, fmtMoney, fmtPct } = require('./format');
 
 const LAST = SEASONS[SEASONS.length - 1];
 const PLAN_ORDER = ['season_pre', 'choice', 'reserved', 'starter', 'ballpark_pass', 'triple_play', 'single'];
+// Three buckets for the plan chart. Members sit on the baseline and carry the accent.
+const PLAN_BUCKETS = [
+  { name: 'Season ticket or membership', plans: ['season_pre', ...MEMBER_PLANS], highlight: true },
+  { name: 'Pass or bundle', plans: ['ballpark_pass', 'triple_play'] },
+  { name: 'Single game', plans: ['single'] },
+];
 const seasonLabels = SEASONS.map(String);
 const sum = (a) => a.reduce((x, y) => x + y, 0);
 
@@ -3559,7 +3585,6 @@ function ticketingView(world) {
   const attendance = SEASONS.map((yr) => ({
     name: String(yr),
     data: Array.from({ length: maxGames }, (_, i) => (bySeason[yr][i] ? scaled(perGame.get(bySeason[yr][i].gameId) || 0) : null)),
-    highlight: yr === LAST || undefined,
   }));
 
   const planCount = {};
@@ -3574,13 +3599,16 @@ function ticketingView(world) {
       if (yr === LAST) noShows += s.noShows;
     }
   }
-  const planSeries = PLAN_ORDER.filter((p) => SEASONS.some((yr) => planCount[yr][p] > 0))
-    .map((p) => ({ name: PLANS[p], data: SEASONS.map((yr) => scaled(planCount[yr][p])) }));
+  const planSeries = PLAN_BUCKETS.map((b) => ({
+    name: b.name, highlight: b.highlight,
+    data: SEASONS.map((yr) => scaled(sum(b.plans.map((p) => planCount[yr][p])))),
+  }));
 
   const totalScans = world.scans.length;
   const lastScans = sum(Object.values(gate[LAST]));
-  const gateData = GATES.map((g) => scaled(gate[LAST][g.id]));
-  const busiest = gateData.indexOf(Math.max(...gateData));
+  const gatesSorted = GATES.map((g) => ({ label: g.label, v: scaled(gate[LAST][g.id]) })).sort((a, b) => b.v - a.v);
+  const transferData = SEASONS.map((yr) => scaled(transfers[yr]));
+  const transfersRose = transferData[transferData.length - 1] > transferData[transferData.length - 2];
   const noShowRate = noShows / (ticketed + noShows);
 
   return {
@@ -3592,13 +3620,13 @@ function ticketingView(world) {
       { id: 'transfers', label: `Tickets transferred, ${LAST}`, value: fmtCount(scaled(transfers[LAST])) },
     ],
     charts: [
-      { id: 'attendanceByGame', type: 'line', unit: 'count', title: 'Scans by home game, 2024–2026',
+      { id: 'attendanceByGame', type: 'line', unit: 'count', title: 'Scans by home game, 2024–2026', seasonSeries: true,
         labels: Array.from({ length: maxGames }, (_, i) => `Game ${i + 1}`), series: attendance },
-      { id: 'planMix', type: 'bar', unit: 'count', stacked: true, title: 'Ticket plans by season (accounts)', labels: seasonLabels, series: planSeries },
-      { id: 'scansByGate', type: 'bar', unit: 'count', title: `Scans by gate, ${LAST}`, labels: GATES.map((g) => g.label),
-        series: [{ name: 'Scans', data: gateData }], highlightIndex: busiest },
-      { id: 'transfers', type: 'bar', unit: 'count', title: 'Tickets transferred by season', labels: seasonLabels,
-        series: [{ name: 'Transfers sent', data: SEASONS.map((yr) => scaled(transfers[yr])) }], highlightIndex: SEASONS.length - 1 },
+      { id: 'planMix', type: 'bar', unit: 'count', stacked: true, title: 'Ticket accounts by season: members vs. everyone else', labels: seasonLabels, series: planSeries },
+      { id: 'scansByGate', type: 'bar', unit: 'count', title: `Scans by gate, ${LAST}, busiest first`, labels: gatesSorted.map((g) => g.label),
+        series: [{ name: 'Scans', data: gatesSorted.map((g) => g.v) }] },
+      { id: 'transfers', type: 'bar', unit: 'count', title: transfersRose ? `Ticket transfers rose in ${LAST}` : 'Tickets transferred by season', labels: seasonLabels,
+        series: [{ name: 'Transfers sent', data: transferData }], highlightIndex: transfersRose ? SEASONS.length - 1 : undefined },
     ],
     cantTell: 'Who is actually in the seat when a ticket is transferred, or what they spend once inside.',
   };
@@ -3631,7 +3659,6 @@ function fnbView(world) {
   for (const s of world.scans) if (s.season === LAST) scansByGame.set(s.gameId, (scansByGame.get(s.gameId) || 0) + 1);
   const lastGames = bySeason[LAST];
   const revenue = lastGames.map((g) => Math.round(scaled(revByGame.get(g.gameId) || 0)));
-  const perCap = lastGames.map((g) => Math.round(((revByGame.get(g.gameId) || 0) / (scansByGame.get(g.gameId) || 1)) * 100) / 100);
   const inParkLast = sum(lastGames.map((g) => revByGame.get(g.gameId) || 0));
   const scansLast = sum([...scansByGame.values()]);
   const totalLast = cat[LAST].food + cat[LAST].beverage + cat[LAST].merch;
@@ -3646,15 +3673,15 @@ function fnbView(world) {
       { id: 'identifiedShare', label: 'Transactions tied to a person', value: fmtPct(identifiedShare, 1) },
     ],
     charts: [
-      { id: 'revenueByGame', type: 'line', unit: 'money', title: `F&B revenue and per-cap by game, ${LAST}`,
+      { id: 'revenueByGame', type: 'line', unit: 'money', title: `F&B and retail revenue by game, ${LAST}`,
         labels: lastGames.map((_, i) => `Game ${i + 1}`),
-        series: [{ name: 'Revenue', data: revenue, axis: 'y' }, { name: 'Per-cap', data: perCap, axis: 'y2' }] },
-      { id: 'categoryMix', type: 'bar', unit: 'money', stacked: true, title: 'Revenue by category and season', labels: seasonLabels,
-        series: [['food', 'Food'], ['beverage', 'Beverage'], ['merch', 'Merchandise']]
-          .map(([k, name]) => ({ name, data: SEASONS.map((yr) => money(cat[yr][k])) })) },
-      { id: 'venueMix', type: 'bar', unit: 'money', stacked: true, title: 'Team Store vs. concessions by season', labels: seasonLabels,
-        series: [['concessions', 'Concessions'], ['mobile', 'Mobile orders'], ['team_store', 'Team Store']]
-          .map(([k, name]) => ({ name, data: SEASONS.map((yr) => money(venue[yr][k])) })) },
+        series: [{ name: 'Revenue', data: revenue }] },
+      { id: 'categoryMix', type: 'bar', unit: 'money', title: 'Revenue by category, 2024–2026', seasonSeries: true,
+        labels: ['Food', 'Beverage', 'Merchandise'],
+        series: SEASONS.map((yr) => ({ name: String(yr), data: ['food', 'beverage', 'merch'].map((k) => money(cat[yr][k])) })) },
+      { id: 'venueMix', type: 'bar', unit: 'money', title: 'Revenue by point of sale, 2024–2026', seasonSeries: true,
+        labels: ['Concessions', 'Mobile orders', 'Team Store'],
+        series: SEASONS.map((yr) => ({ name: String(yr), data: ['concessions', 'mobile', 'team_store'].map((k) => money(venue[yr][k])) })) },
       { id: 'identifiedShare', type: 'doughnut', unit: 'count', title: 'Transactions tied to a person, 2024–2026',
         labels: ['Tied to a person', 'Anonymous card swipe'],
         series: [{ name: 'Transactions', data: [scaled(txns.identified), scaled(txns.anonymous)] }], highlightIndex: 0 },
@@ -3692,6 +3719,7 @@ function groupsView(world) {
   const lastAttendees = sum(lastBookings.map((g) => g.size));
   const lastNamed = people[LAST].organizers + people[LAST].known;
   const others = medianInt(world.groups.map((g) => g.size)) - 1;
+  const mostlyHeadcount = SEASONS.every((yr) => people[yr].headcount > people[yr].organizers + people[yr].known);
 
   return {
     intro: 'Group outings, ballpark tours, suites and the Rooftop Deck. The organizer is known; most of the people they bring are a headcount.',
@@ -3701,21 +3729,17 @@ function groupsView(world) {
       { id: 'namedShare', label: 'Group attendees with a name on file', value: fmtPct(lastNamed / lastAttendees) },
     ],
     charts: [
-      { id: 'bookingsByType', type: 'bar', unit: 'count', title: 'Group bookings by type and season', labels: GROUP_TYPES,
-        series: SEASONS.map((yr) => ({ name: String(yr), data: GROUP_TYPES.map((t) => scaled(byType[yr][t])), highlight: yr === LAST || undefined })) },
-      { id: 'knownVsHeadcount', type: 'bar', unit: 'count', stacked: true, title: 'Organizers vs. total attendees', labels: seasonLabels,
+      { id: 'bookingsByType', type: 'bar', unit: 'count', title: 'Group bookings by type, 2024–2026', labels: GROUP_TYPES, seasonSeries: true,
+        series: SEASONS.map((yr) => ({ name: String(yr), data: GROUP_TYPES.map((t) => scaled(byType[yr][t])) })) },
+      { id: 'knownVsHeadcount', type: 'bar', unit: 'count', stacked: true,
+        title: mostlyHeadcount ? 'Most group attendees are a headcount, not a name' : 'Group attendees: named vs. headcount', labels: seasonLabels,
         series: [
-          { name: 'Organizers', data: SEASONS.map((yr) => scaled(people[yr].organizers)) },
-          { name: 'Known via booking link', data: SEASONS.map((yr) => scaled(people[yr].known)) },
-          { name: 'Headcount only', data: SEASONS.map((yr) => scaled(people[yr].headcount)), highlight: true },
+          { name: 'Name on file (organizer or booking link)', data: SEASONS.map((yr) => scaled(people[yr].organizers + people[yr].known)), highlight: true },
+          { name: 'Headcount only', data: SEASONS.map((yr) => scaled(people[yr].headcount)) },
         ] },
-      { id: 'toursPremium', type: 'bar', unit: 'count', title: 'Tours and premium bookings by season', labels: seasonLabels,
-        series: [
-          { name: 'Ballpark tours', data: SEASONS.map((yr) => scaled(exp[yr].tour)) },
-          { name: 'Suites', data: SEASONS.map((yr) => scaled(exp[yr].suite)) },
-          { name: 'Rooftop Deck', data: SEASONS.map((yr) => scaled(exp[yr].rooftop_deck)) },
-          { name: 'Group outings in premium areas', data: SEASONS.map((yr) => scaled(exp[yr].premiumGroups)) },
-        ] },
+      { id: 'toursPremium', type: 'bar', unit: 'count', title: 'Tours and premium bookings, 2024–2026', seasonSeries: true,
+        labels: ['Ballpark tours', 'Suites', 'Rooftop Deck', 'Groups in premium areas'],
+        series: SEASONS.map((yr) => ({ name: String(yr), data: ['tour', 'suite', 'rooftop_deck', 'premiumGroups'].map((k) => scaled(exp[yr][k])) })) },
     ],
     cantTell: `Whether the ${others} other people in a group ever come back on their own.`,
     medianOthers: others,

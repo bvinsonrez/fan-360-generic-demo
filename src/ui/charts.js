@@ -4,8 +4,14 @@ const { fmtChartValue } = require('../format');
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 const LABEL_PX = 12;
-// Non-highlighted series cycle: primary and one neutral, then tints of the same two.
-const CYCLE = [PALETTE.primary, PALETTE.grey, '#4A86C5', PALETTE.greyLight, '#8FB3D9', PALETTE.slate, '#C3D6EA'];
+// Color rules, in order:
+// 1. Seasons are ordinal: a light-to-dark blue ramp, newest season darkest.
+// 2. The accent marks the one thing the chart title asks you to notice; everything else
+//    in that chart drops to grey so the accent is the only saturated mark.
+// 3. Otherwise categories cycle from the primary blue through its tints and neutrals.
+const SEASON_RAMP = ['#BFD3EA', '#5E93CF', PALETTE.primary];
+const CONTEXT = [PALETTE.greyLight, PALETTE.grey, PALETTE.slate];
+const CYCLE = [PALETTE.primary, PALETTE.grey, '#5E93CF', PALETTE.greyLight, '#BFD3EA', PALETTE.slate];
 const EMPTY_TEXT = 'No fans match these filters';
 
 const live = new Map();
@@ -32,9 +38,22 @@ function isAllZero(spec) {
 }
 
 function seriesColors(spec) {
+  if (spec.seasonSeries) {
+    const off = SEASON_RAMP.length - spec.series.length;
+    return spec.series.map((_, i) => SEASON_RAMP[Math.max(0, i + off)]);
+  }
   let n = 0;
-  return spec.series.map((s) => (s.highlight ? PALETTE.accent : CYCLE[n++ % CYCLE.length]));
+  if (spec.series.some((s) => s.highlight)) return spec.series.map((s) => (s.highlight ? PALETTE.accent : CONTEXT[n++ % CONTEXT.length]));
+  return spec.series.map(() => CYCLE[n++ % CYCLE.length]);
 }
+
+// Text color for a label drawn on a filled shape: white only where it reads at 4.5:1.
+function lum(hex) {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function labelOn(bg) { return 1.05 / (lum(bg) + 0.05) >= 4.5 ? PALETTE.white : PALETTE.ink; }
 
 function isDonut(spec) { return spec.type === 'doughnut' || spec.type === 'donut'; }
 function isHorizontal(spec) { return spec.type === 'hbar' || spec.indexAxis === 'y'; }
@@ -50,11 +69,12 @@ function buildDatasets(spec) {
   return spec.series.map((s, si) => {
     const base = { label: s.name, data: s.data };
     if (spec.type === 'line') {
-      return { ...base, borderColor: colors[si], backgroundColor: colors[si], borderWidth: s.highlight ? 2.5 : 1.5,
+      const strong = s.highlight || (spec.seasonSeries && si === spec.series.length - 1) || spec.series.length === 1;
+      return { ...base, borderColor: colors[si], backgroundColor: colors[si], borderWidth: strong ? 2.5 : 1.5,
         pointRadius: 0, pointHoverRadius: 4, tension: 0.2, spanGaps: false, yAxisID: s.axis || 'y' };
     }
     const bg = spec.series.length === 1 && hi !== undefined
-      ? s.data.map((_, i) => (i === hi ? PALETTE.accent : PALETTE.primary))
+      ? s.data.map((_, i) => (i === hi ? PALETTE.accent : PALETTE.grey))
       : colors[si];
     return { ...base, backgroundColor: bg, borderColor: PALETTE.white, borderWidth: spec.stacked ? 1 : 0, maxBarThickness: 56 };
   });
@@ -77,7 +97,7 @@ function buildScales(spec) {
   const categoryAxis = {
     stacked: !!spec.stacked,
     grid: { display: false },
-    ticks: { font: axisTitleFont(), color: PALETTE.slate, autoSkip: true, maxTicksLimit: spec.type === 'line' ? 9 : 12, maxRotation: 0 },
+    ticks: { font: axisTitleFont(), color: PALETTE.slate, autoSkip: spec.type === 'line', maxTicksLimit: spec.type === 'line' ? 9 : 12, maxRotation: 0 },
   };
   const scales = horizontal ? { x: valueAxis({ position: 'bottom' }), y: categoryAxis } : { x: categoryAxis, y: valueAxis({ position: 'left' }) };
   if (spec.series.some((s) => s.axis === 'y2')) {
@@ -92,8 +112,8 @@ function valueLabelPlugin(spec) {
     id: 'valueLabels',
     afterDatasetsDraw(chart) {
       const donut = isDonut(spec);
-      const points = spec.series.length * spec.labels.length;
-      if (spec.type === 'line' || spec.stacked || (!donut && points > 12)) return;
+      // Label single-series bars and donuts only; multi-series charts read from the axis.
+      if (spec.type === 'line' || spec.stacked || (!donut && spec.series.length > 1)) return;
       const ctx = chart.ctx;
       ctx.save();
       ctx.font = `600 ${LABEL_PX}px ${FONT}`;
@@ -104,7 +124,7 @@ function valueLabelPlugin(spec) {
           if (v === null || v === undefined || v === 0) return;
           const text = fmtChartValue(v, spec.unit);
           if (donut) {
-            ctx.fillStyle = PALETTE.white;
+            ctx.fillStyle = labelOn(ds.backgroundColor[i]);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             const p = arc.tooltipPosition();

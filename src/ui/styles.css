@@ -1,5 +1,5 @@
 :root {
-  --primary: #004987; --accent: #7E3DA0; --ink: #1B2733; --slate: #5B6B7B;
+  --primary: #004987; --accent: #D9730D; --ink: #1B2733; --slate: #5B6B7B;
   --grey: #9AA5B1; --grey-light: #D5DBE1; --surface: #F4F6F8; --white: #FFFFFF;
 }
 * { box-sizing: border-box; }
@@ -58,7 +58,7 @@ body {
 .parts-bar { display: flex; height: 26px; border-radius: 4px; overflow: hidden; margin: 6px 0 8px; gap: 2px; }
 .parts-seg { min-width: 4px; }
 .parts-seg-0 { background: var(--primary); }
-.parts-seg-1 { background: #4A86C5; }
+.parts-seg-1 { background: #5E93CF; }
 .parts-seg-2 { background: var(--grey); }
 .parts-list { list-style: none; margin: 0 0 6px; padding: 0; }
 .parts-item { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 14px; }
@@ -100,7 +100,7 @@ body {
 .lane-cell { background: var(--surface); border-radius: 4px; min-height: 44px; padding: 3px; display: flex; flex-direction: column; gap: 3px; }
 .lane-event { font-size: 12px; background: var(--primary); color: var(--white); border-radius: 3px; padding: 1px 5px; }
 .lane-transfer { background: var(--grey); color: var(--ink); }
-.lane-group, .lane-experience { background: #4A86C5; }
+.lane-group, .lane-experience { background: #5E93CF; }
 @media (max-width: 900px) { .pf-cols { grid-template-columns: 1fr; } }
 
 /* Tab 6 */
